@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sprout } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Header = () => {
   return (
@@ -24,11 +25,11 @@ export const Header = () => {
             </SelectContent>
           </Select>
           
-          <Button variant="ghost" className="hidden sm:inline-flex">
-            Login
+          <Button variant="ghost" className="hidden sm:inline-flex" asChild>
+            <Link to="/auth">Login</Link>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90">
-            Sign Up
+          <Button className="bg-primary hover:bg-primary/90" asChild>
+            <Link to="/auth">Sign Up</Link>
           </Button>
         </div>
       </div>
