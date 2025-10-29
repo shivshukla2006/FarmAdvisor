@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, User, Bell, Globe, Lock, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 
 const profileSchema = z.object({
   fullName: z.string().min(2).max(100),
@@ -88,8 +89,8 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <DashboardLayout>
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-heading font-bold mb-2">Profile Settings</h1>
           <p className="text-muted-foreground">Manage your account and preferences</p>
@@ -360,7 +361,7 @@ const Profile = () => {
           </Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

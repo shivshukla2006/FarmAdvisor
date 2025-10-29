@@ -5,7 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import Recommendations from "./pages/Recommendations";
+import Weather from "./pages/Weather";
+import PestDiagnosis from "./pages/PestDiagnosis";
+import Schemes from "./pages/Schemes";
+import Community from "./pages/Community";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,7 +26,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/weather" element={<Weather />} />
+          <Route path="/pest-diagnosis" element={<PestDiagnosis />} />
+          <Route path="/schemes" element={<Schemes />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/analytics" element={<Analytics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
