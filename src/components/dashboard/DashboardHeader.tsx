@@ -18,12 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
 }
 
 export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
+  const { signOut } = useAuth();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="flex items-center justify-between h-16 px-4">
@@ -99,7 +102,7 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
                 <Link to="/analytics" className="cursor-pointer">Analytics</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer">
+              <DropdownMenuItem className="text-destructive cursor-pointer" onClick={signOut}>
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

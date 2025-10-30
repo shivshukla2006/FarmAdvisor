@@ -40,14 +40,32 @@ export const LoginForm = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     
-    // Placeholder for authentication logic (Phase 5)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { signIn } = await import('@/contexts/AuthContext').then(m => ({ signIn: () => {} }));
+    
+    // Import supabase client
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+    
+    if (error) {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
     
     toast({
       title: "Login Successful",
       description: "Welcome back to FarmAdvisor!",
     });
     
+    // Redirect happens in AuthContext
     setIsLoading(false);
   };
 

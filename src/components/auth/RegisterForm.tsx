@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,6 +52,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -70,8 +72,23 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     
-    // Placeholder for authentication logic (Phase 5)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await signUp(data.email, data.password, {
+      full_name: data.fullName,
+      phone: data.phone,
+      farm_location: data.farmLocation,
+      farm_size: data.farmSize,
+      primary_crops: data.primaryCrop,
+    });
+    
+    if (error) {
+      toast({
+        title: "Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
     
     toast({
       title: "Registration Successful",

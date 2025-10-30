@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -37,6 +37,8 @@ import {
 import { Loader2, User, Bell, Globe, Lock, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const profileSchema = z.object({
   fullName: z.string().min(2).max(100),
@@ -51,31 +53,97 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [weatherAlerts, setWeatherAlerts] = useState(true);
   const [communityUpdates, setCommunityUpdates] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      fullName: "Rajesh Kumar",
-      email: "rajesh@example.com",
-      phone: "+91 9876543210",
-      farmLocation: "Pune, Maharashtra",
-      farmSize: "medium",
-      primaryCrop: "rice",
+      fullName: "",
+      email: "",
+      phone: "",
+      farmLocation: "",
+      farmSize: "",
+      primaryCrop: "",
     },
   });
 
+  // Load profile data on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load profile data.",
+          variant: "destructive",
+        });
+        setLoadingProfile(false);
+        return;
+      }
+
+      if (data) {
+        form.reset({
+          fullName: data.full_name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          farmLocation: data.farm_location || "",
+          farmSize: data.farm_size || "",
+          primaryCrop: data.primary_crops?.[0] || "",
+        });
+        setWeatherAlerts(data.notifications_weather ?? true);
+        setEmailNotifications(data.notifications_schemes ?? true);
+        setCommunityUpdates(data.notifications_community ?? false);
+      }
+      setLoadingProfile(false);
+    };
+
+    loadProfile();
+  }, [user, form, toast]);
+
   const onSubmit = async (data: ProfileFormValues) => {
+    if (!user) return;
+
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        farm_location: data.farmLocation,
+        farm_size: data.farmSize,
+        primary_crops: [data.primaryCrop],
+        notifications_weather: weatherAlerts,
+        notifications_schemes: emailNotifications,
+        notifications_community: communityUpdates,
+      })
+      .eq('id', user.id);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+      });
+    }
     
     setIsLoading(false);
   };
@@ -90,7 +158,12 @@ const Profile = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
+      {loadingProfile ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-heading font-bold mb-2">Profile Settings</h1>
           <p className="text-muted-foreground">Manage your account and preferences</p>
@@ -359,8 +432,9 @@ const Profile = () => {
               </AlertDialog>
             </div>
           </Card>
+         </div>
         </div>
-      </div>
+      )}
     </DashboardLayout>
   );
 };
