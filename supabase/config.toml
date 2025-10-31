@@ -1,1 +1,13 @@
 project_id = "btspzagknvsbzyhwfvkh"
+
+[functions.weather]
+verify_jwt = false
+
+[functions.crop-recommendation]
+verify_jwt = true
+
+[functions.pest-diagnosis]
+verify_jwt = true
+
+[functions.chat]
+verify_jwt = false
