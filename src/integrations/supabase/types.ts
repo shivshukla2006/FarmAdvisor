@@ -14,6 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_posts: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          images: string[] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          images?: string[] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          images?: string[] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      community_replies: {
+        Row: {
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          post_id: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          post_id: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          post_id?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crop_recommendations: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          preferences: string[] | null
+          recommendations: Json
+          season: string
+          soil_type: string
+          status: Database["public"]["Enums"]["recommendation_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          preferences?: string[] | null
+          recommendations: Json
+          season: string
+          soil_type: string
+          status?: Database["public"]["Enums"]["recommendation_status"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          preferences?: string[] | null
+          recommendations?: Json
+          season?: string
+          soil_type?: string
+          status?: Database["public"]["Enums"]["recommendation_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      government_schemes: {
+        Row: {
+          active: boolean | null
+          application_link: string | null
+          application_process: string | null
+          benefits: string
+          contact_info: Json | null
+          created_at: string
+          crop_types: string[] | null
+          deadline: string | null
+          description: string
+          documents_required: string[] | null
+          eligibility: string
+          id: string
+          scheme_type: string | null
+          state: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          application_link?: string | null
+          application_process?: string | null
+          benefits: string
+          contact_info?: Json | null
+          created_at?: string
+          crop_types?: string[] | null
+          deadline?: string | null
+          description: string
+          documents_required?: string[] | null
+          eligibility: string
+          id?: string
+          scheme_type?: string | null
+          state?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          application_link?: string | null
+          application_process?: string | null
+          benefits?: string
+          contact_info?: Json | null
+          created_at?: string
+          crop_types?: string[] | null
+          deadline?: string | null
+          description?: string
+          documents_required?: string[] | null
+          eligibility?: string
+          id?: string
+          scheme_type?: string | null
+          state?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pest_diagnoses: {
+        Row: {
+          created_at: string
+          crop_type: string | null
+          diagnosis_result: Json | null
+          id: string
+          image_url: string
+          pest_identified: string | null
+          severity: string | null
+          status: Database["public"]["Enums"]["diagnosis_status"] | null
+          treatment_recommendations: string[] | null
+          updated_at: string
+          user_feedback: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_type?: string | null
+          diagnosis_result?: Json | null
+          id?: string
+          image_url: string
+          pest_identified?: string | null
+          severity?: string | null
+          status?: Database["public"]["Enums"]["diagnosis_status"] | null
+          treatment_recommendations?: string[] | null
+          updated_at?: string
+          user_feedback?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_type?: string | null
+          diagnosis_result?: Json | null
+          id?: string
+          image_url?: string
+          pest_identified?: string | null
+          severity?: string | null
+          status?: Database["public"]["Enums"]["diagnosis_status"] | null
+          treatment_recommendations?: string[] | null
+          updated_at?: string
+          user_feedback?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_votes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -62,6 +327,142 @@ export type Database = {
         }
         Relationships: []
       }
+      reply_votes: {
+        Row: {
+          created_at: string
+          id: string
+          reply_id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reply_id: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reply_id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reply_votes_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "community_replies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheme_bookmarks: {
+        Row: {
+          application_status: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          scheme_id: string
+          user_id: string
+        }
+        Insert: {
+          application_status?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          scheme_id: string
+          user_id: string
+        }
+        Update: {
+          application_status?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          scheme_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_bookmarks_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "government_schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weather_alerts: {
+        Row: {
+          affected_regions: string[] | null
+          alert_type: string
+          created_at: string
+          description: string
+          end_time: string | null
+          id: string
+          location: string
+          severity: Database["public"]["Enums"]["alert_severity"]
+          start_time: string
+          title: string
+        }
+        Insert: {
+          affected_regions?: string[] | null
+          alert_type: string
+          created_at?: string
+          description: string
+          end_time?: string | null
+          id?: string
+          location: string
+          severity: Database["public"]["Enums"]["alert_severity"]
+          start_time: string
+          title: string
+        }
+        Update: {
+          affected_regions?: string[] | null
+          alert_type?: string
+          created_at?: string
+          description?: string
+          end_time?: string | null
+          id?: string
+          location?: string
+          severity?: Database["public"]["Enums"]["alert_severity"]
+          start_time?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -70,7 +471,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_type:
+        | "recommendation"
+        | "diagnosis"
+        | "forum_post"
+        | "scheme_bookmark"
+      alert_severity: "info" | "warning" | "critical"
+      diagnosis_status: "pending" | "completed" | "reviewed"
+      recommendation_status: "pending" | "completed" | "saved"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -197,6 +605,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_type: [
+        "recommendation",
+        "diagnosis",
+        "forum_post",
+        "scheme_bookmark",
+      ],
+      alert_severity: ["info", "warning", "critical"],
+      diagnosis_status: ["pending", "completed", "reviewed"],
+      recommendation_status: ["pending", "completed", "saved"],
+    },
   },
 } as const
