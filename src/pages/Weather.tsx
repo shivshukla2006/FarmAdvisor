@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherData, type ForecastData } from "@/services/weatherService";
+import { Loader2 } from "lucide-react";
 import {
   Sun,
   Cloud,
@@ -28,39 +31,95 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const forecastData = [
-  { day: "Mon", high: 32, low: 24, condition: "Sunny", icon: Sun },
-  { day: "Tue", high: 30, low: 23, condition: "Cloudy", icon: Cloud },
-  { day: "Wed", high: 28, low: 22, condition: "Rainy", icon: CloudRain },
-  { day: "Thu", high: 27, low: 21, condition: "Rainy", icon: CloudRain },
-  { day: "Fri", high: 29, low: 22, condition: "Cloudy", icon: Cloud },
-  { day: "Sat", high: 31, low: 24, condition: "Sunny", icon: Sun },
-  { day: "Sun", high: 33, low: 25, condition: "Sunny", icon: Sun },
-];
-
-const alerts = [
-  {
-    type: "warning",
-    title: "Heavy Rainfall Alert",
-    description: "Heavy rainfall expected in your region. Secure crops and equipment.",
-    severity: "High",
-  },
-  {
-    type: "info",
-    title: "Temperature Advisory",
-    description: "Temperatures may drop below 20°C. Protect sensitive crops.",
-    severity: "Medium",
-  },
-];
+const getWeatherIcon = (description: string) => {
+  const desc = description.toLowerCase();
+  if (desc.includes("rain")) return CloudRain;
+  if (desc.includes("cloud")) return Cloud;
+  if (desc.includes("snow")) return CloudSnow;
+  return Sun;
+};
 
 const Weather = () => {
-  const [location, setLocation] = useState("Pune, Maharashtra");
+  const [location, setLocation] = useState("Fetching location...");
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastData[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState({
     rain: true,
     temperature: true,
     wind: false,
     frost: true,
   });
+  const { toast } = useToast();
+
+  const fetchWeatherData = async () => {
+    if (!coordinates) return;
+    
+    setIsLoading(true);
+    try {
+      const [weather, forecastData, alertsData] = await Promise.all([
+        getCurrentWeather(coordinates.lat, coordinates.lon),
+        getWeatherForecast(coordinates.lat, coordinates.lon),
+        getWeatherAlerts(coordinates.lat, coordinates.lon),
+      ]);
+
+      setCurrentWeather(weather);
+      setForecast(forecastData);
+      setAlerts(alertsData);
+    } catch (error) {
+      console.error("Error fetching weather data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch weather data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Error",
+        description: "Geolocation is not supported by your browser",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        setCoordinates({ lat, lon });
+        setLocation("Loading weather...");
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        toast({
+          title: "Location Error",
+          description: "Could not get your location. Using default location.",
+          variant: "destructive",
+        });
+        // Default to Pune coordinates
+        setCoordinates({ lat: 18.5204, lon: 73.8567 });
+        setLocation("Pune, India");
+      }
+    );
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
+
+  useEffect(() => {
+    if (coordinates) {
+      fetchWeatherData();
+    }
+  }, [coordinates]);
 
   return (
     <DashboardLayout>
@@ -96,7 +155,7 @@ const Weather = () => {
                       onChange={(e) => setLocation(e.target.value)}
                       className="flex-1"
                     />
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={getUserLocation}>
                       <MapPin className="h-4 w-4" />
                     </Button>
                   </div>
@@ -173,65 +232,88 @@ const Weather = () => {
             <span className="text-lg font-medium">{location}</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex items-center gap-6">
-              <Sun className="h-24 w-24 text-accent" />
-              <div>
-                <div className="text-6xl font-bold mb-2">28°C</div>
-                <div className="text-lg text-muted-foreground">Sunny</div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                  <TrendingUp className="h-4 w-4" />
-                  <span>High: 32°C</span>
-                  <TrendingDown className="h-4 w-4 ml-2" />
-                  <span>Low: 24°C</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : currentWeather ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex items-center gap-6">
+                {(() => {
+                  const WeatherIcon = getWeatherIcon(currentWeather.description);
+                  return <WeatherIcon className="h-24 w-24 text-accent" />;
+                })()}
+                <div>
+                  <div className="text-6xl font-bold mb-2">{Math.round(currentWeather.temperature)}°C</div>
+                  <div className="text-lg text-muted-foreground capitalize">{currentWeather.description}</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
+                  <Droplets className="h-8 w-8 text-primary mb-2" />
+                  <div className="text-2xl font-bold">{currentWeather.humidity}%</div>
+                  <div className="text-sm text-muted-foreground">Humidity</div>
+                </div>
+                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
+                  <Wind className="h-8 w-8 text-secondary mb-2" />
+                  <div className="text-2xl font-bold">{Math.round(currentWeather.windSpeed)} km/h</div>
+                  <div className="text-sm text-muted-foreground">Wind Speed</div>
+                </div>
+                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
+                  <CloudRain className="h-8 w-8 text-primary mb-2" />
+                  <div className="text-2xl font-bold">{currentWeather.precipitation}%</div>
+                  <div className="text-sm text-muted-foreground">Precipitation</div>
+                </div>
+                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
+                  <Eye className="h-8 w-8 text-muted-foreground mb-2" />
+                  <div className="text-2xl font-bold">{(currentWeather.windSpeed / 10).toFixed(1)} km</div>
+                  <div className="text-sm text-muted-foreground">Visibility</div>
                 </div>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <Droplets className="h-8 w-8 text-primary mb-2" />
-                <div className="text-2xl font-bold">65%</div>
-                <div className="text-sm text-muted-foreground">Humidity</div>
-              </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <Wind className="h-8 w-8 text-secondary mb-2" />
-                <div className="text-2xl font-bold">12 km/h</div>
-                <div className="text-sm text-muted-foreground">Wind Speed</div>
-              </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <CloudRain className="h-8 w-8 text-primary mb-2" />
-                <div className="text-2xl font-bold">40%</div>
-                <div className="text-sm text-muted-foreground">Rain Chance</div>
-              </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <Eye className="h-8 w-8 text-muted-foreground mb-2" />
-                <div className="text-2xl font-bold">10 km</div>
-                <div className="text-sm text-muted-foreground">Visibility</div>
-              </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Failed to load weather data
             </div>
-          </div>
+          )}
         </Card>
 
         {/* 7-Day Forecast */}
         <Card className="p-6">
           <h2 className="text-xl font-heading font-semibold mb-4">7-Day Forecast</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            {forecastData.map((day, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <div className="font-medium mb-2">{day.day}</div>
-                <day.icon className="h-10 w-10 text-primary mb-2" />
-                <div className="text-sm text-muted-foreground mb-1">{day.condition}</div>
-                <div className="flex gap-2 text-sm">
-                  <span className="font-semibold">{day.high}°</span>
-                  <span className="text-muted-foreground">{day.low}°</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : forecast.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {forecast.map((day, index) => {
+                const WeatherIcon = getWeatherIcon(day.description);
+                const date = new Date(day.date);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="font-medium mb-2">{dayName}</div>
+                    <WeatherIcon className="h-10 w-10 text-primary mb-2" />
+                    <div className="text-sm text-muted-foreground mb-1 capitalize">{day.description}</div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="font-semibold">{Math.round(day.temperature.max)}°</span>
+                      <span className="text-muted-foreground">{Math.round(day.temperature.min)}°</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No forecast data available
+            </div>
+          )}
         </Card>
 
         {/* Agricultural Impact */}
