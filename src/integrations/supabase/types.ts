@@ -465,7 +465,40 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      post_vote_counts: {
+        Row: {
+          downvote_count: number | null
+          post_id: string | null
+          total_votes: number | null
+          upvote_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reply_vote_counts: {
+        Row: {
+          downvote_count: number | null
+          reply_id: string | null
+          total_votes: number | null
+          upvote_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reply_votes_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "community_replies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

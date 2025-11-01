@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Leaf, MapPin, Calendar, Bookmark, Share2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getCropRecommendations, type CropRecommendation } from "@/services/cropRecommendationService";
 
 const soilTypes = ["Loamy", "Clay", "Sandy", "Silt", "Red Soil", "Black Soil", "Alluvial"];
 const seasons = ["Kharif (Monsoon)", "Rabi (Winter)", "Zaid (Summer)"];
@@ -16,6 +17,7 @@ const cropOptions = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Pulses", 
 const Recommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [recommendations, setRecommendations] = useState<CropRecommendation[]>([]);
   const [formData, setFormData] = useState({
     soilType: "",
     season: "",
@@ -33,19 +35,33 @@ const Recommendations = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const results = await getCropRecommendations({
+        soilType: formData.soilType,
+        season: formData.season,
+        location: formData.location,
+        preferences: formData.selectedCrops,
+      });
+      
+      setRecommendations(results);
       setShowResults(true);
       toast({
         title: "Recommendations Generated",
         description: "AI-powered crop recommendations are ready!",
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to generate recommendations",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSave = () => {
@@ -169,29 +185,7 @@ const Recommendations = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: "Rice",
-                  suitability: "Highly Recommended",
-                  timing: "Plant in June-July",
-                  yield: "4-5 tons/acre",
-                  care: "Requires consistent water supply and warm temperatures",
-                },
-                {
-                  name: "Cotton",
-                  suitability: "Recommended",
-                  timing: "Plant in May-June",
-                  yield: "15-20 quintals/acre",
-                  care: "Needs moderate rainfall and well-drained soil",
-                },
-                {
-                  name: "Sugarcane",
-                  suitability: "Suitable",
-                  timing: "Plant in February-March",
-                  yield: "40-50 tons/acre",
-                  care: "Requires heavy irrigation and rich soil",
-                },
-              ].map((crop, index) => (
+              {recommendations.map((crop, index) => (
                 <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -210,11 +204,11 @@ const Recommendations = () => {
 
                     <div className="text-sm">
                       <span className="text-muted-foreground">Expected Yield:</span>
-                      <span className="font-medium ml-2">{crop.yield}</span>
+                      <span className="font-medium ml-2">{crop.expectedYield}</span>
                     </div>
 
                     <div className="pt-3 border-t">
-                      <p className="text-sm text-muted-foreground">{crop.care}</p>
+                      <p className="text-sm text-muted-foreground">{crop.careInstructions}</p>
                     </div>
                   </div>
                 </Card>
