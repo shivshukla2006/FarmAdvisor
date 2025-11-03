@@ -69,18 +69,23 @@ const Weather = () => {
 
     setIsSearching(true);
     try {
+      console.log("Searching for location:", searchQuery);
+      
       const { data, error } = await supabase.functions.invoke("weather", {
-        body: { type: "geocode", query: searchQuery },
+        body: { type: "geocode", query: searchQuery.trim() },
       });
       
+      console.log("Geocode response:", { data, error });
+      
       if (error) {
+        console.error("Geocode error:", error);
         throw error;
       }
 
       if (!data || data.length === 0) {
         toast({
           title: "Not Found",
-          description: "Location not found. Please try a different search.",
+          description: "Location not found. Please try searching with city name (e.g., 'Mumbai', 'Delhi', 'London')",
           variant: "destructive",
         });
         return;
@@ -98,8 +103,8 @@ const Weather = () => {
     } catch (error) {
       console.error("Error searching location:", error);
       toast({
-        title: "Error",
-        description: "Failed to search location. Please try again.",
+        title: "Search Failed",
+        description: error instanceof Error ? error.message : "Failed to search location. Please try again.",
         variant: "destructive",
       });
     } finally {

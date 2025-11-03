@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useChatbot } from "@/contexts/ChatbotContext";
 import {
   LayoutDashboard,
   Leaf,
@@ -29,6 +30,7 @@ const menuItems = [
 
 export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => {
   const location = useLocation();
+  const { openChatbot } = useChatbot();
 
   return (
     <>
@@ -83,7 +85,15 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
               <div className="text-xs text-muted-foreground mb-3">
                 Chat with our AI assistant for instant support
               </div>
-              <Button size="sm" className="w-full" variant="outline">
+              <Button 
+                size="sm" 
+                className="w-full" 
+                variant="outline"
+                onClick={() => {
+                  openChatbot();
+                  onClose();
+                }}
+              >
                 Get Support
               </Button>
             </div>

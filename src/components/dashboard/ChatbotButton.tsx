@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useChatbot } from "@/contexts/ChatbotContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,7 +13,7 @@ interface Message {
 }
 
 export const ChatbotButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, closeChatbot, toggleChatbot } = useChatbot();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -132,7 +133,7 @@ export const ChatbotButton = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsOpen(false)}
+              onClick={closeChatbot}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -186,7 +187,7 @@ export const ChatbotButton = () => {
       <Button
         size="lg"
         className="fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full shadow-lg"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleChatbot}
       >
         {isOpen ? (
           <X className="h-6 w-6" />

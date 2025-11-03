@@ -24,16 +24,20 @@ serve(async (req) => {
         throw new Error('Query parameter is required for geocoding');
       }
       
-      const response = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=1&appid=${OPENWEATHER_API_KEY}`
-      );
+      console.log('Geocoding request for:', query);
+      
+      const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${OPENWEATHER_API_KEY}`;
+      console.log('Fetching from:', geocodeUrl.replace(OPENWEATHER_API_KEY, 'API_KEY'));
+      
+      const response = await fetch(geocodeUrl);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch geocoding data');
+        console.error('Geocoding API error:', response.status, response.statusText);
+        throw new Error(`Geocoding API returned ${response.status}: ${response.statusText}`);
       }
       
       const geocodeData = await response.json();
-      console.log('Geocoding data fetched successfully for:', query);
+      console.log('Geocoding results found:', geocodeData.length);
       
       return new Response(JSON.stringify(geocodeData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
