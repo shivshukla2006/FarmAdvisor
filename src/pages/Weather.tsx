@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherData, type ForecastData } from "@/services/weatherService";
 import { Loader2 } from "lucide-react";
 import {
@@ -41,11 +42,13 @@ const getWeatherIcon = (description: string) => {
 
 const Weather = () => {
   const [location, setLocation] = useState("Fetching location...");
+  const [locationInput, setLocationInput] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [notifications, setNotifications] = useState({
     rain: true,
     temperature: true,
@@ -53,6 +56,56 @@ const Weather = () => {
     frost: true,
   });
   const { toast } = useToast();
+
+  const searchLocation = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a location name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("weather", {
+        body: { type: "geocode", query: searchQuery },
+      });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        toast({
+          title: "Not Found",
+          description: "Location not found. Please try a different search.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const result = data[0];
+      setCoordinates({ lat: result.lat, lon: result.lon });
+      setLocation(`${result.name}, ${result.country}`);
+      setLocationInput("");
+      
+      toast({
+        title: "Location Updated",
+        description: `Now showing weather for ${result.name}, ${result.country}`,
+      });
+    } catch (error) {
+      console.error("Error searching location:", error);
+      toast({
+        title: "Error",
+        description: "Failed to search location. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const fetchWeatherData = async () => {
     if (!coordinates) return;
@@ -67,7 +120,7 @@ const Weather = () => {
 
       setCurrentWeather(weather);
       setForecast(forecastData);
-      setAlerts(alertsData);
+      setAlerts(alertsData || []);
     } catch (error) {
       console.error("Error fetching weather data:", error);
       toast({
@@ -147,18 +200,43 @@ const Weather = () => {
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <div className="flex gap-2">
+                  <Label htmlFor="location">Current Location</Label>
+                  <div className="flex gap-2 mb-4">
                     <Input
-                      id="location"
+                      id="current-location"
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      disabled
                       className="flex-1"
                     />
-                    <Button variant="outline" size="icon" onClick={getUserLocation}>
+                    <Button variant="outline" size="icon" onClick={getUserLocation} title="Use my current location">
                       <MapPin className="h-4 w-4" />
                     </Button>
                   </div>
+                  
+                  <Label htmlFor="search-location">Search Location</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="search-location"
+                      placeholder="Enter city name..."
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          searchLocation(locationInput);
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={() => searchLocation(locationInput)}
+                      disabled={isSearching}
+                    >
+                      {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter a city name and press Enter or click Search
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -204,26 +282,44 @@ const Weather = () => {
         </div>
 
         {/* Active Alerts */}
-        {alerts.length > 0 && (
-          <div className="space-y-3">
-            {alerts.map((alert, index) => (
-              <Card key={index} className={`p-4 border-l-4 ${alert.severity === "High" ? "border-l-destructive" : "border-l-accent"}`}>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${alert.severity === "High" ? "text-destructive" : "text-accent"}`} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-heading font-semibold">{alert.title}</h3>
-                      <span className={`text-xs px-2 py-1 rounded ${alert.severity === "High" ? "bg-destructive/10 text-destructive" : "bg-accent/10 text-accent"}`}>
-                        {alert.severity}
-                      </span>
+        <Card className="p-6">
+          <h2 className="text-xl font-heading font-semibold mb-4">Active Weather Alerts</h2>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : alerts.length > 0 ? (
+            <div className="space-y-3">
+              {alerts.map((alert, index) => (
+                <div key={index} className={`p-4 border-l-4 rounded-lg ${alert.severity === "High" || alert.severity === "severe" ? "border-l-destructive bg-destructive/5" : "border-l-accent bg-accent/5"}`}>
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${alert.severity === "High" || alert.severity === "severe" ? "text-destructive" : "text-accent"}`} />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-heading font-semibold">{alert.event || alert.title}</h3>
+                        <span className={`text-xs px-2 py-1 rounded ${alert.severity === "High" || alert.severity === "severe" ? "bg-destructive/10 text-destructive" : "bg-accent/10 text-accent"}`}>
+                          {alert.severity}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{alert.description}</p>
+                      {alert.start && alert.end && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Valid from {new Date(alert.start * 1000).toLocaleString()} to {new Date(alert.end * 1000).toLocaleString()}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{alert.description}</p>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+              <p className="text-muted-foreground">No active weather alerts for your location</p>
+              <p className="text-sm text-muted-foreground mt-1">We'll notify you when weather conditions change</p>
+            </div>
+          )}
+        </Card>
 
         {/* Current Weather */}
         <Card className="p-6">

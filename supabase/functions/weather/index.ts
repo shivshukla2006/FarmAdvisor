@@ -11,11 +11,33 @@ serve(async (req) => {
   }
 
   try {
-    const { latitude, longitude, type = 'current' } = await req.json();
+    const { latitude, longitude, type = 'current', query } = await req.json();
     const OPENWEATHER_API_KEY = Deno.env.get('OPENWEATHER_API_KEY');
 
     if (!OPENWEATHER_API_KEY) {
       throw new Error('OPENWEATHER_API_KEY not configured');
+    }
+
+    // Handle geocoding requests
+    if (type === 'geocode') {
+      if (!query) {
+        throw new Error('Query parameter is required for geocoding');
+      }
+      
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=1&appid=${OPENWEATHER_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch geocoding data');
+      }
+      
+      const geocodeData = await response.json();
+      console.log('Geocoding data fetched successfully for:', query);
+      
+      return new Response(JSON.stringify(geocodeData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!latitude || !longitude) {
