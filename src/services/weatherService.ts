@@ -7,6 +7,8 @@ export interface WeatherData {
   windSpeed: number;
   description: string;
   icon: string;
+  cityName: string;
+  country: string;
 }
 
 export interface ForecastData {
@@ -40,6 +42,8 @@ export const getCurrentWeather = async (
     windSpeed: data.wind.speed * 3.6, // Convert m/s to km/h
     description: data.weather[0].description,
     icon: data.weather[0].icon,
+    cityName: data.name,
+    country: data.sys.country,
   };
 };
 

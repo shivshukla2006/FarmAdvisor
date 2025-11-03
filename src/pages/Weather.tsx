@@ -121,6 +121,11 @@ const Weather = () => {
       setCurrentWeather(weather);
       setForecast(forecastData);
       setAlerts(alertsData || []);
+      
+      // Update location name from weather data
+      if (weather.cityName && weather.country) {
+        setLocation(`${weather.cityName}, ${weather.country}`);
+      }
     } catch (error) {
       console.error("Error fetching weather data:", error);
       toast({
@@ -143,23 +148,29 @@ const Weather = () => {
       return;
     }
 
+    setLocation("Detecting your location...");
+    
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         setCoordinates({ lat, lon });
-        setLocation("Loading weather...");
+        setLocation("Fetching weather data...");
+        
+        toast({
+          title: "Location Found",
+          description: "Loading real-time weather data for your location...",
+        });
       },
       (error) => {
         console.error("Error getting location:", error);
         toast({
-          title: "Location Error",
-          description: "Could not get your location. Using default location.",
+          title: "Location Access Denied",
+          description: "Using default location (Pune, India). Enable location access for accurate alerts.",
           variant: "destructive",
         });
         // Default to Pune coordinates
         setCoordinates({ lat: 18.5204, lon: 73.8567 });
-        setLocation("Pune, India");
       }
     );
   };
