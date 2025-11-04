@@ -30,7 +30,7 @@ interface DashboardHeaderProps {
 export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
   const { signOut } = useAuth();
   const { isAdmin, isLoading } = useUserRole();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -78,17 +78,17 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-popover border-border z-[60]">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("myAccount")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/profile" className="cursor-pointer">Profile Settings</Link>
+                <Link to="/profile" className="cursor-pointer">{t("profileSettings")}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/analytics" className="cursor-pointer">Analytics</Link>
+                <Link to="/analytics" className="cursor-pointer">{t("analytics")}</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive cursor-pointer" onClick={signOut}>
-                Logout
+                {t("logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

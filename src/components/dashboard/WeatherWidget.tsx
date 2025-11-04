@@ -5,10 +5,12 @@ import { getCurrentWeather, WeatherData } from "@/services/weatherService";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const getWeatherData = async () => {
@@ -85,7 +87,7 @@ export const WeatherWidget = () => {
   return (
     <Card className="p-6 bg-card border-border">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-heading font-semibold">Weather Overview</h2>
+        <h2 className="text-xl font-heading font-semibold">{t("weatherOverview")}</h2>
         <span className="text-sm text-muted-foreground">
           {weather.cityName}, {weather.country}
         </span>
@@ -95,25 +97,25 @@ export const WeatherWidget = () => {
         <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
           {getWeatherIcon(weather.description)}
           <div className="text-2xl font-bold">{Math.round(weather.temperature)}°C</div>
-          <div className="text-sm text-muted-foreground">Temperature</div>
+          <div className="text-sm text-muted-foreground">{t("temperature")}</div>
         </div>
 
         <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
           <Droplets className="h-8 w-8 text-primary mb-2" />
           <div className="text-2xl font-bold">{weather.humidity}%</div>
-          <div className="text-sm text-muted-foreground">Humidity</div>
+          <div className="text-sm text-muted-foreground">{t("humidity")}</div>
         </div>
 
         <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
           <Wind className="h-8 w-8 text-secondary mb-2" />
           <div className="text-2xl font-bold">{Math.round(weather.windSpeed)} km/h</div>
-          <div className="text-sm text-muted-foreground">Wind Speed</div>
+          <div className="text-sm text-muted-foreground">{t("windSpeed")}</div>
         </div>
 
         <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
           <CloudRain className="h-8 w-8 text-primary mb-2" />
           <div className="text-2xl font-bold">{weather.precipitation || 0}%</div>
-          <div className="text-sm text-muted-foreground">Rain Chance</div>
+          <div className="text-sm text-muted-foreground">{t("rainChance")}</div>
         </div>
       </div>
 
@@ -122,7 +124,7 @@ export const WeatherWidget = () => {
           {weather.description}
         </div>
         <Button asChild variant="link" size="sm">
-          <Link to="/weather">View Full Forecast</Link>
+          <Link to="/weather">{t("viewFullForecast")}</Link>
         </Button>
       </div>
     </Card>

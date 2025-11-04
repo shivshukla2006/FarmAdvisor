@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-type Language = "en" | "hi" | "mr" | "ta";
+import { translations, Language, TranslationKey } from "@/lib/translations";
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  t: (key: TranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -24,8 +24,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const setLanguage = (lang: Language) => {
+    console.log("Language changed to:", lang);
     setLanguageState(lang);
     localStorage.setItem("app-language", lang);
+  };
+
+  const t = (key: TranslationKey): string => {
+    return translations[language][key] || translations.en[key] || key;
   };
 
   useEffect(() => {
@@ -33,7 +38,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [language]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

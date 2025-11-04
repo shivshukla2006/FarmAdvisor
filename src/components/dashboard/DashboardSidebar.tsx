@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useChatbot } from "@/contexts/ChatbotContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   LayoutDashboard,
   Leaf,
@@ -18,19 +19,20 @@ interface DashboardSidebarProps {
   onClose: () => void;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Leaf, label: "Crop Recommendations", path: "/recommendations" },
-  { icon: CloudRain, label: "Weather Alerts", path: "/weather" },
-  { icon: Bug, label: "Pest Diagnosis", path: "/pest-diagnosis" },
-  { icon: Newspaper, label: "Government Schemes", path: "/schemes" },
-  { icon: Users, label: "Community Forum", path: "/community" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-];
-
 export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => {
   const location = useLocation();
   const { openChatbot } = useChatbot();
+  const { t } = useLanguage();
+
+  const menuItems = [
+    { icon: LayoutDashboard, label: t("dashboard"), path: "/dashboard" },
+    { icon: Leaf, label: t("recommendations"), path: "/recommendations" },
+    { icon: CloudRain, label: t("weather"), path: "/weather" },
+    { icon: Bug, label: t("pestDiagnosis"), path: "/pest-diagnosis" },
+    { icon: Newspaper, label: t("schemes"), path: "/schemes" },
+    { icon: Users, label: t("community"), path: "/community" },
+    { icon: BarChart3, label: t("analytics"), path: "/analytics" },
+  ];
 
   return (
     <>
@@ -81,9 +83,9 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
 
           <div className="p-4 border-t">
             <div className="bg-muted/50 rounded-lg p-4">
-              <div className="text-sm font-medium mb-1">Need Help?</div>
+              <div className="text-sm font-medium mb-1">{t("needHelp")}</div>
               <div className="text-xs text-muted-foreground mb-3">
-                Chat with our AI assistant for instant support
+                {t("chatWithAI")}
               </div>
               <Button 
                 size="sm" 
@@ -94,7 +96,7 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
                   onClose();
                 }}
               >
-                Get Support
+                {t("getSupport")}
               </Button>
             </div>
           </div>

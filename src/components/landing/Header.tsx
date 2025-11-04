@@ -3,9 +3,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sprout } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Language } from "@/lib/translations";
 
 export const Header = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -16,7 +17,7 @@ export const Header = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <Select value={language} onValueChange={setLanguage}>
+          <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
             <SelectTrigger className="w-[120px] bg-background">
               <SelectValue placeholder="Language" />
             </SelectTrigger>
@@ -29,10 +30,10 @@ export const Header = () => {
           </Select>
           
           <Button variant="ghost" className="hidden sm:inline-flex" asChild>
-            <Link to="/auth">Login</Link>
+            <Link to="/auth">{t("login")}</Link>
           </Button>
           <Button className="bg-primary hover:bg-primary/90" asChild>
-            <Link to="/auth">Sign Up</Link>
+            <Link to="/auth">{t("signUp")}</Link>
           </Button>
         </div>
       </div>
