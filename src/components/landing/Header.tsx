@@ -2,8 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sprout } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Header = () => {
+  const { language, setLanguage } = useLanguage();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -13,7 +16,7 @@ export const Header = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <Select defaultValue="en">
+          <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger className="w-[120px] bg-background">
               <SelectValue placeholder="Language" />
             </SelectTrigger>

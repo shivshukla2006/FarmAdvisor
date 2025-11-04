@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -29,6 +30,7 @@ interface DashboardHeaderProps {
 export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
   const { signOut } = useAuth();
   const { isAdmin, isLoading } = useUserRole();
+  const { language, setLanguage } = useLanguage();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -55,7 +57,7 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <Select defaultValue="en">
+          <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger className="w-[100px] md:w-[120px] bg-background border-input">
               <SelectValue />
             </SelectTrigger>
@@ -63,7 +65,7 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
               <SelectItem value="en">English</SelectItem>
               <SelectItem value="hi">हिंदी</SelectItem>
               <SelectItem value="mr">मराठी</SelectItem>
-              <SelectItem value="ta">தமிழ்</SelectItem>
+              <SelectItem value="ta">தமिழ்</SelectItem>
             </SelectContent>
           </Select>
 
