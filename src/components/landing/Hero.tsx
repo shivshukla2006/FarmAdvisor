@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 export const Hero = () => {
+  const [showVideo, setShowVideo] = useState(false);
+  
   return (
     <section className="pt-32 pb-20 px-4">
       <div className="container mx-auto">
@@ -26,7 +30,12 @@ export const Hero = () => {
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg h-12 px-8">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg h-12 px-8"
+              onClick={() => setShowVideo(true)}
+            >
               Watch Demo
             </Button>
           </div>
@@ -47,6 +56,26 @@ export const Hero = () => {
           </div>
         </div>
       </div>
+
+      <Dialog open={showVideo} onOpenChange={setShowVideo}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>FarmAdvisor Platform Demo</DialogTitle>
+          </DialogHeader>
+          <div className="aspect-video w-full">
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              title="FarmAdvisor Demo"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="rounded-lg"
+            ></iframe>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
