@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const CTA = () => {
   return (
@@ -16,9 +17,12 @@ export const CTA = () => {
             <Button 
               size="lg" 
               className="text-lg h-12 px-8 bg-background text-foreground hover:bg-background/90"
+              asChild
             >
-              Start Free Trial
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <Link to="/auth">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
             <Button 
               size="lg" 

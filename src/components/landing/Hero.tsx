@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Hero = () => {
   return (
@@ -22,9 +23,11 @@ export const Hero = () => {
           </p>
           
           <div className="flex justify-center">
-            <Button size="lg" className="text-lg h-12 px-8 bg-primary hover:bg-primary/90">
-              Get Started Free
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button size="lg" className="text-lg h-12 px-8 bg-primary hover:bg-primary/90" asChild>
+              <Link to="/auth">
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
           
