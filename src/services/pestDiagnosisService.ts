@@ -41,9 +41,16 @@ export const diagnosePest = async (
 };
 
 export const uploadPestImage = async (file: File): Promise<string> => {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error("You must be logged in to upload images");
+  }
+
   const fileExt = file.name.split(".").pop();
-  const fileName = `${Math.random()}.${fileExt}`;
-  const filePath = `pest-images/${fileName}`;
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `${user.id}/${fileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("pest-images")
