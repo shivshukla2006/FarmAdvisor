@@ -18,7 +18,7 @@ serve(async (req) => {
       throw new Error('OPENWEATHER_API_KEY not configured');
     }
 
-    // Handle geocoding requests
+    // Handle geocoding requests (forward and reverse)
     if (type === 'geocode') {
       if (!query) {
         throw new Error('Query parameter is required for geocoding');
@@ -40,6 +40,31 @@ serve(async (req) => {
       console.log('Geocoding results found:', geocodeData.length);
       
       return new Response(JSON.stringify(geocodeData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle reverse geocoding (coordinates to location name)
+    if (type === 'reverse') {
+      if (!latitude || !longitude) {
+        throw new Error('Latitude and longitude are required for reverse geocoding');
+      }
+      
+      console.log('Reverse geocoding for:', latitude, longitude);
+      
+      const reverseUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${OPENWEATHER_API_KEY}`;
+      
+      const response = await fetch(reverseUrl);
+      
+      if (!response.ok) {
+        console.error('Reverse geocoding API error:', response.status, response.statusText);
+        throw new Error(`Reverse geocoding API returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const reverseData = await response.json();
+      console.log('Reverse geocoding result:', reverseData);
+      
+      return new Response(JSON.stringify(reverseData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

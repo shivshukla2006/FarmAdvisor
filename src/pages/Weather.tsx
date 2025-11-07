@@ -127,10 +127,8 @@ const Weather = () => {
       setForecast(forecastData);
       setAlerts(alertsData || []);
       
-      // Update location name from weather data
-      if (weather.cityName && weather.country) {
-        setLocation(`${weather.cityName}, ${weather.country}`);
-      }
+      // Don't override location if we already have a proper location set
+      // (Weather API sometimes returns incorrect location names)
     } catch (error) {
       console.error("Error fetching weather data:", error);
       toast({
@@ -156,16 +154,32 @@ const Weather = () => {
     setLocation("Detecting your location...");
     
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         setCoordinates({ lat, lon });
-        setLocation("Fetching weather data...");
+        setLocation("Fetching location name...");
         
-        toast({
-          title: "Location Found",
-          description: "Loading real-time weather data for your location...",
-        });
+        // Get proper location name using reverse geocoding
+        try {
+          const { data, error } = await supabase.functions.invoke("weather", {
+            body: { type: "reverse", latitude: lat, longitude: lon },
+          });
+          
+          if (!error && data && data.length > 0) {
+            const locationName = `${data[0].name}${data[0].state ? ', ' + data[0].state : ''}, ${data[0].country}`;
+            setLocation(locationName);
+            toast({
+              title: "Location Found",
+              description: `Loading weather data for ${locationName}`,
+            });
+          } else {
+            setLocation("Your Location");
+          }
+        } catch (error) {
+          console.error("Error getting location name:", error);
+          setLocation("Your Location");
+        }
       },
       (error) => {
         console.error("Error getting location:", error);
@@ -174,7 +188,7 @@ const Weather = () => {
           description: "Using default location (Pune, India). Enable location access for accurate alerts.",
           variant: "destructive",
         });
-        // Default to Pune coordinates
+        setLocation("Pune, Maharashtra, IN");
         setCoordinates({ lat: 18.5204, lon: 73.8567 });
       }
     );
