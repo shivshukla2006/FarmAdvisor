@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { diagnosePest, uploadPestImage } from "@/services/pestDiagnosisService";
 
 interface DiagnosisResult {
   pest: string;
@@ -66,38 +67,52 @@ const PestDiagnosis = () => {
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!selectedFile) return;
     
     setIsAnalyzing(true);
+    setResult(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    try {
+      // Upload image to storage
+      const imageUrl = await uploadPestImage(selectedFile);
+      
+      // Diagnose the pest
+      const diagnosis = await diagnosePest({ imageUrl });
+      
+      // Transform the diagnosis result to match our UI format
       setResult({
-        pest: "Aphids (Aphis gossypii)",
-        confidence: 94,
-        severity: "Medium",
-        description: "Small, soft-bodied insects found on the undersides of leaves and stems. They suck plant sap, causing leaves to curl, yellow, and distort. Heavy infestations can stunt plant growth.",
-        treatment: [
-          "Apply neem oil spray (5ml per liter of water) early morning or evening",
-          "Use insecticidal soap solution for immediate control",
-          "Introduce natural predators like ladybugs and lacewings",
-          "Remove heavily infested plant parts and destroy them",
-        ],
-        prevention: [
-          "Regular monitoring of crops, especially during warm weather",
-          "Maintain proper plant spacing for good air circulation",
-          "Avoid excessive nitrogen fertilization",
-          "Use reflective mulches to repel aphids",
-          "Plant companion crops like marigolds to deter pests",
-        ],
+        pest: diagnosis.pestIdentified,
+        confidence: diagnosis.confidence || 0,
+        severity: (diagnosis.severity?.charAt(0).toUpperCase() + diagnosis.severity?.slice(1)) as "Low" | "Medium" | "High",
+        description: diagnosis.description,
+        treatment: diagnosis.treatmentRecommendations?.map((t: any) => 
+          typeof t === 'string' ? t : `${t.method}: ${t.description}`
+        ) || [],
+        prevention: diagnosis.preventiveMeasures || [],
       });
+      
       toast({
         title: "Analysis Complete",
-        description: "Pest identified with 94% confidence",
+        description: `Pest identified: ${diagnosis.pestIdentified}`,
       });
-    }, 3000);
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to analyze image";
+      
+      toast({
+        title: "Analysis Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      // Clear the image if it's invalid
+      if (errorMessage.toLowerCase().includes('invalid photo')) {
+        handleClear();
+      }
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleClear = () => {

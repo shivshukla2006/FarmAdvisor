@@ -31,6 +31,77 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
+    // Step 1: Validate if the image is relevant to agriculture/pests
+    console.log('Step 1: Validating image content...');
+    const validationPrompt = `Analyze this image and determine if it shows:
+- Agricultural crops or plants
+- Plant diseases, pests, or damage
+- Insects or organisms affecting plants
+- Any agricultural/farming related content
+
+Respond with JSON:
+{
+  "isValid": boolean,
+  "reason": "brief explanation"
+}
+
+Return isValid: false if the image shows:
+- Random objects, people, animals (not pests)
+- Indoor scenes, buildings, vehicles
+- Food items, cooked dishes
+- Any non-agricultural content`;
+
+    const validationResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: validationPrompt
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: imageUrl
+                }
+              }
+            ]
+          }
+        ],
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!validationResponse.ok) {
+      throw new Error('Image validation failed');
+    }
+
+    const validationResult = await validationResponse.json();
+    const validation = JSON.parse(validationResult.choices[0].message.content);
+    
+    console.log('Validation result:', validation);
+
+    if (!validation.isValid) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid photo',
+          message: 'The uploaded image does not appear to show crops, plants, pests, or agricultural content. Please upload a clear photo of affected plants or crop damage.',
+          reason: validation.reason
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Step 2: Proceed with pest diagnosis
+    console.log('Step 2: Performing pest diagnosis...');
     const prompt = `You are an expert plant pathologist and agricultural pest specialist. Analyze this image of a crop plant and identify any pests, diseases, or issues.
 
 ${cropType ? `Crop Type: ${cropType}` : ''}

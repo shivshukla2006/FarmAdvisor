@@ -7,9 +7,11 @@ export interface PestDiagnosisInput {
 
 export interface PestDiagnosisResult {
   pestIdentified: string;
+  confidence?: number;
   severity: string;
   treatmentRecommendations: string[];
   description: string;
+  preventiveMeasures?: string[];
 }
 
 export const diagnosePest = async (
@@ -21,7 +23,18 @@ export const diagnosePest = async (
 
   if (error) {
     console.error("Error diagnosing pest:", error);
+    
+    // Check if it's an invalid photo error
+    if (error.message?.includes('Invalid photo') || error.context?.body?.error === 'Invalid photo') {
+      throw new Error('Invalid photo: Please upload a clear image of crops, plants, pests, or agricultural damage.');
+    }
+    
     throw new Error("Failed to diagnose pest. Please try again.");
+  }
+
+  // Handle 400 error from edge function
+  if (data?.error === 'Invalid photo') {
+    throw new Error(data.message || 'Invalid photo: Please upload a clear image of crops, plants, pests, or agricultural damage.');
   }
 
   return data;
