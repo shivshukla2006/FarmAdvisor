@@ -20,8 +20,17 @@ export interface CropRecommendation {
 export const getCropRecommendations = async (
   input: CropRecommendationInput
 ): Promise<CropRecommendation[]> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    throw new Error("Please log in to get crop recommendations.");
+  }
+
   const { data, error } = await supabase.functions.invoke("crop-recommendation", {
     body: input,
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+    },
   });
 
   if (error) {
