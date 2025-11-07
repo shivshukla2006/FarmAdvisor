@@ -121,7 +121,23 @@ Format your response as a structured JSON with this schema:
     }
 
     const aiResponse = await response.json();
-    const recommendations = JSON.parse(aiResponse.choices[0].message.content);
+    const aiData = JSON.parse(aiResponse.choices[0].message.content);
+    
+    // Transform AI response to match frontend expectations
+    const transformedRecommendations = aiData.recommendations.map((rec: any) => ({
+      name: rec.cropName,
+      suitability: `${rec.suitabilityScore}% suitable`,
+      timing: `${rec.plantingPeriod} (${rec.duration})`,
+      expectedYield: rec.expectedYield,
+      careInstructions: `${rec.waterRequirements} | ${rec.fertilizerPlan}`,
+      pestManagement: rec.pestManagement,
+      marketPotential: rec.marketPotential,
+      additionalTips: rec.additionalTips
+    }));
+
+    const recommendations = {
+      recommendations: transformedRecommendations
+    };
 
     // Save to database
     const { data: savedRec, error: dbError } = await supabaseClient
