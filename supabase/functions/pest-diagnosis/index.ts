@@ -19,31 +19,27 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    // Authentication is optional - if provided, we'll save to user's account
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.error('No authorization header provided');
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    let user = null;
+    
+    if (authHeader) {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const { data: { user: authUser }, error: authErr } = await supabaseClient.auth.getUser();
+      if (!authErr && authUser) {
+        user = authUser;
+        console.log('User authenticated:', user.id);
+      } else {
+        console.log('Authentication failed, proceeding without user context');
+      }
+    } else {
+      console.log('No authentication provided, proceeding as public request');
     }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
-    if (authErr || !user) {
-      console.error('Authentication error:', authErr?.message || 'No user found');
-      return new Response(JSON.stringify({ error: 'Unauthorized', message: authErr?.message }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log('User authenticated:', user.id);
 
     // Step 1: Validate if the image is relevant to agriculture/pests
     console.log('Step 1: Validating image content...');
@@ -189,35 +185,42 @@ Please provide a detailed analysis in JSON format:
     const aiResponse = await response.json();
     const diagnosis = JSON.parse(aiResponse.choices[0].message.content);
 
-    // Save to database
-    const { data: savedDiagnosis, error: dbError } = await supabaseClient
-      .from('pest_diagnoses')
-      .insert({
-        user_id: user.id,
-        image_url: imageUrl,
-        crop_type: cropType,
-        pest_identified: diagnosis.pestIdentified,
-        severity: diagnosis.severity,
-        diagnosis_result: diagnosis,
-        treatment_recommendations: diagnosis.treatmentRecommendations.map((t: any) => t.method),
-        status: 'completed'
-      })
-      .select()
-      .single();
+    // Save to database only if user is authenticated
+    if (user) {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader! } } }
+      );
 
-    if (dbError) {
-      console.error('Database error:', dbError);
-      throw dbError;
+      const { data: savedDiagnosis, error: dbError } = await supabaseClient
+        .from('pest_diagnoses')
+        .insert({
+          user_id: user.id,
+          image_url: imageUrl,
+          crop_type: cropType,
+          pest_identified: diagnosis.pestIdentified,
+          severity: diagnosis.severity,
+          diagnosis_result: diagnosis,
+          treatment_recommendations: diagnosis.treatmentRecommendations.map((t: any) => t.method),
+          status: 'completed'
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+      } else {
+        // Log activity
+        await supabaseClient.from('user_activities').insert({
+          user_id: user.id,
+          activity_type: 'diagnosis',
+          title: 'Pest diagnosis completed',
+          description: `Identified: ${diagnosis.pestIdentified}`,
+          reference_id: savedDiagnosis.id
+        });
+      }
     }
-
-    // Log activity
-    await supabaseClient.from('user_activities').insert({
-      user_id: user.id,
-      activity_type: 'diagnosis',
-      title: 'Pest diagnosis completed',
-      description: `Identified: ${diagnosis.pestIdentified}`,
-      reference_id: savedDiagnosis.id
-    });
 
     console.log('Pest diagnosis completed successfully');
 
