@@ -17,27 +17,49 @@ export interface PestDiagnosisResult {
 export const diagnosePest = async (
   input: PestDiagnosisInput
 ): Promise<PestDiagnosisResult> => {
+  // Ensure we send a valid user JWT to the edge function
+  const { data: sessionData } = await supabase.auth.getSession();
+  let accessToken = sessionData?.session?.access_token;
+
+  // Try refresh if token missing
+  if (!accessToken) {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    accessToken = refreshed?.session?.access_token;
+  }
+
+  if (!accessToken) {
+    throw new Error("You are not signed in. Please log in and try again.");
+  }
+
   const { data, error } = await supabase.functions.invoke("pest-diagnosis", {
     body: input,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (error) {
     console.error("Error diagnosing pest:", error);
-    
+
+    // Surface Unauthorized explicitly
+    if ((error as any).status === 401 || (error as any).message?.includes("Unauthorized")) {
+      throw new Error("Your session expired. Please sign in again.");
+    }
+
     // Check if it's an invalid photo error
-    if (error.message?.includes('Invalid photo') || error.context?.body?.error === 'Invalid photo') {
+    if ((error as any).message?.includes('Invalid photo') || (error as any).context?.body?.error === 'Invalid photo') {
       throw new Error('Invalid photo: Please upload a clear image of crops, plants, pests, or agricultural damage.');
     }
-    
+
     throw new Error("Failed to diagnose pest. Please try again.");
   }
 
   // Handle 400 error from edge function
-  if (data?.error === 'Invalid photo') {
-    throw new Error(data.message || 'Invalid photo: Please upload a clear image of crops, plants, pests, or agricultural damage.');
+  if ((data as any)?.error === 'Invalid photo') {
+    throw new Error((data as any).message || 'Invalid photo: Please upload a clear image of crops, plants, pests, or agricultural damage.');
   }
 
-  return data;
+  return data as PestDiagnosisResult;
 };
 
 export const uploadPestImage = async (file: File): Promise<string> => {
