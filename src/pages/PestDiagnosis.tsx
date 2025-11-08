@@ -50,6 +50,30 @@ const PestDiagnosis = () => {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const { toast } = useToast();
 
+  const handleCameraCapture = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: "File too large",
+            description: "Please select an image under 5MB",
+            variant: "destructive",
+          });
+          return;
+        }
+        setSelectedFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
+        setResult(null);
+      }
+    };
+    input.click();
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -161,7 +185,7 @@ const PestDiagnosis = () => {
                         <Upload className="mr-2 h-4 w-4" />
                         Browse Files
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleCameraCapture}>
                         <Camera className="mr-2 h-4 w-4" />
                         Take Photo
                       </Button>
