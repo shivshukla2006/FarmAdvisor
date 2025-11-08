@@ -17,9 +17,25 @@ export interface PestDiagnosisResult {
 export const diagnosePest = async (
   input: PestDiagnosisInput
 ): Promise<PestDiagnosisResult> => {
-  // supabase.functions.invoke automatically handles authentication
+  // Ensure we send a valid user JWT to the edge function
+  const { data: sessionData } = await supabase.auth.getSession();
+  let accessToken = sessionData?.session?.access_token;
+
+  // Try refresh if token missing
+  if (!accessToken) {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    accessToken = refreshed?.session?.access_token;
+  }
+
+  if (!accessToken) {
+    throw new Error("You are not signed in. Please log in and try again.");
+  }
+
   const { data, error } = await supabase.functions.invoke("pest-diagnosis", {
     body: input,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (error) {
