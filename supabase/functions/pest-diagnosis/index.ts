@@ -6,6 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to clean markdown formatting from JSON responses
+function cleanJsonResponse(content: string): string {
+  // Remove markdown code blocks if present
+  let cleaned = content.trim();
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/```\s*$/, '');
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```\s*/, '').replace(/```\s*$/, '');
+  }
+  return cleaned.trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -95,7 +107,8 @@ Return isValid: false if the image shows:
     }
 
     const validationResult = await validationResponse.json();
-    const validation = JSON.parse(validationResult.choices[0].message.content);
+    const cleanedValidation = cleanJsonResponse(validationResult.choices[0].message.content);
+    const validation = JSON.parse(cleanedValidation);
     
     console.log('Validation result:', validation);
 
@@ -183,7 +196,8 @@ Please provide a detailed analysis in JSON format:
     }
 
     const aiResponse = await response.json();
-    const diagnosis = JSON.parse(aiResponse.choices[0].message.content);
+    const cleanedDiagnosis = cleanJsonResponse(aiResponse.choices[0].message.content);
+    const diagnosis = JSON.parse(cleanedDiagnosis);
 
     // Save to database only if user is authenticated
     if (user) {
