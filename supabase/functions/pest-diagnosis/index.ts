@@ -19,20 +19,31 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const authHeader = req.headers.get('Authorization') || '';
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
-    if (authErr || !user) {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('No authorization header provided');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
+    if (authErr || !user) {
+      console.error('Authentication error:', authErr?.message || 'No user found');
+      return new Response(JSON.stringify({ error: 'Unauthorized', message: authErr?.message }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('User authenticated:', user.id);
 
     // Step 1: Validate if the image is relevant to agriculture/pests
     console.log('Step 1: Validating image content...');
