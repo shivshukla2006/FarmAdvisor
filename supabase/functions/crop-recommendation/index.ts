@@ -124,68 +124,37 @@ Format your response as a structured JSON with this schema:
       throw new Error("AI request failed");
     }
 
-    // ---- Robust JSON extraction (handles objects, arrays, and ``` fences) ----
+    // ---- Robust JSON extraction without changing overall logic ----
     const aiResponse = await response.json();
 
-    // Pull the "best guess" content from different shapes
-    const choice = aiResponse?.choices?.[0];
-    let content: unknown =
-      choice?.message?.content ??
-      choice?.content ?? // some providers
-      choice?.text ??    // some providers
+    // Some gateways put JSON in message.content, some may return plain text,
+    // and occasionally models wrap JSON in ```json ... ```
+    const rawContent =
+      aiResponse?.choices?.[0]?.message?.content ??
+      aiResponse?.choices?.[0]?.text ??
       "";
 
-    // If content is an array of segments, join its textual parts
-    if (Array.isArray(content)) {
-      content = content
-        .map((part: any) =>
-          typeof part === "string"
-            ? part
-            : (part?.text ?? part?.content ?? "")
-        )
-        .join("\n");
-    }
-
-    // Convert objects to a JSON string directly (already structured)
-    const normalizeToString = (input: unknown): string => {
-      if (input === null || input === undefined) return "";
-      if (typeof input === "string") return input;
-      if (typeof input === "object") {
-        try {
-          return JSON.stringify(input);
-        } catch {
-          // fallback to toString, but this usually won't happen
-          return String(input);
-        }
-      }
-      return String(input);
+    const extractJsonString = (input: unknown): string => {
+      const raw = String(input ?? "");
+      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      return fenceMatch ? fenceMatch[1] : raw;
     };
 
-    const stripCodeFences = (raw: string): string => {
-      // Remove ```json ... ``` or ``` ... ``` fences if present
-      const fence = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      return fence ? fence[1] : raw;
-    };
-
-    const rawStr = normalizeToString(content).trim();
-    const jsonStr = stripCodeFences(rawStr);
-
-    // Optional: small preview for debugging
-    console.log("AI raw preview:", rawStr.slice(0, 300));
+    const jsonStr = extractJsonString(rawContent);
 
     let aiData: any;
     try {
       aiData = JSON.parse(jsonStr);
     } catch (e) {
-      console.error("Failed to parse AI JSON:", e, "jsonStr preview:", jsonStr.slice(0, 300));
+      console.error("Failed to parse AI JSON. Preview:", String(jsonStr).slice(0, 300));
       throw new Error("AI returned non-JSON content");
     }
 
     if (!aiData || !Array.isArray(aiData.recommendations)) {
-      console.error("AI response missing 'recommendations'. Preview:", jsonStr.slice(0, 300));
+      console.error("AI response missing 'recommendations'. Preview:", String(jsonStr).slice(0, 300));
       throw new Error("AI response is missing 'recommendations' array");
     }
-    // ---- end extraction ----
+    // ---- end of robust JSON extraction ----
 
     // Transform AI response to match frontend expectations
     const transformedRecommendations = aiData.recommendations.map((rec: any) => ({
@@ -199,7 +168,9 @@ Format your response as a structured JSON with this schema:
       additionalTips: rec.additionalTips,
     }));
 
-    const recommendations = { recommendations: transformedRecommendations };
+    const recommendations = {
+      recommendations: transformedRecommendations,
+    };
 
     // Save to database
     const { data: savedRec, error: dbError } = await supabaseClient
