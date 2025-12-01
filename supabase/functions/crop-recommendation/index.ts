@@ -6,13 +6,44 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation
+const validateCoordinates = (lat?: number, lon?: number): boolean => {
+  if (lat === undefined || lon === undefined) return true; // optional
+  return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+};
+
+const validateString = (str: string, maxLength: number): boolean => {
+  return typeof str === 'string' && str.length > 0 && str.length <= maxLength;
+};
+
+const validateArray = (arr: any[], maxLength: number): boolean => {
+  return Array.isArray(arr) && arr.length <= maxLength;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { soilType, season, location, preferences, latitude, longitude } = await req.json();
+    const { soilType, season, location, preferences = [], latitude, longitude } = await req.json();
+
+    // Validate inputs
+    if (!validateString(soilType, 100)) {
+      throw new Error('Invalid soilType: must be 1-100 characters');
+    }
+    if (!validateString(season, 50)) {
+      throw new Error('Invalid season: must be 1-50 characters');
+    }
+    if (!validateString(location, 200)) {
+      throw new Error('Invalid location: must be 1-200 characters');
+    }
+    if (!validateArray(preferences, 20)) {
+      throw new Error('Invalid preferences: maximum 20 items allowed');
+    }
+    if (!validateCoordinates(latitude, longitude)) {
+      throw new Error('Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180');
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {

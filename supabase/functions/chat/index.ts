@@ -1,8 +1,42 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Input validation and sanitization
+const validateMessages = (messages: any[]): boolean => {
+  if (!Array.isArray(messages) || messages.length === 0) return false;
+  if (messages.length > 50) return false; // Max 50 messages in history
+  
+  return messages.every(msg => {
+    if (!msg.role || !msg.content) return false;
+    if (!['user', 'assistant', 'system'].includes(msg.role)) return false;
+    if (typeof msg.content !== 'string') return false;
+    if (msg.content.length > 5000) return false; // Max 5000 chars per message
+    return true;
+  });
+};
+
+// Basic sanitization for user prompts to prevent prompt injection
+const sanitizeUserMessage = (content: string): string => {
+  // Remove potential system prompt injection patterns
+  let sanitized = content
+    .replace(/\[SYSTEM\]/gi, '')
+    .replace(/\[INST\]/gi, '')
+    .replace(/\[\/INST\]/gi, '')
+    .replace(/<\|system\|>/gi, '')
+    .replace(/<\|user\|>/gi, '')
+    .replace(/<\|assistant\|>/gi, '');
+  
+  // Limit length
+  if (sanitized.length > 5000) {
+    sanitized = sanitized.substring(0, 5000);
+  }
+  
+  return sanitized;
 };
 
 serve(async (req) => {
@@ -11,7 +45,40 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Unauthorized: Missing authorization header');
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Unauthorized: Invalid token');
+    }
+
     const { messages } = await req.json();
+
+    // Validate input
+    if (!validateMessages(messages)) {
+      throw new Error('Invalid messages: must be an array of 1-50 messages with valid role and content (max 5000 chars each)');
+    }
+
+    // Sanitize user messages
+    const sanitizedMessages = messages.map((msg: any) => {
+      if (msg.role === 'user') {
+        return {
+          ...msg,
+          content: sanitizeUserMessage(msg.content)
+        };
+      }
+      return msg;
+    });
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -38,7 +105,7 @@ Keep your responses clear, practical, and actionable. If you're unsure about som
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages
+          ...sanitizedMessages
         ],
         stream: true,
       }),
@@ -70,7 +137,7 @@ Keep your responses clear, practical, and actionable. If you're unsure about som
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
-        status: 500,
+        status: error instanceof Error && error.message.startsWith('Unauthorized') ? 401 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

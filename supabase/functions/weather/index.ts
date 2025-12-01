@@ -1,8 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Input validation schemas
+const validateCoordinates = (lat: number, lon: number): boolean => {
+  return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+};
+
+const validateQuery = (query: string): boolean => {
+  return query.length > 0 && query.length <= 200;
 };
 
 serve(async (req) => {
@@ -11,6 +21,23 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Unauthorized: Missing authorization header');
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Unauthorized: Invalid token');
+    }
+
     const { latitude, longitude, type = 'current', query } = await req.json();
     const OPENWEATHER_API_KEY = Deno.env.get('OPENWEATHER_API_KEY');
 
@@ -20,8 +47,8 @@ serve(async (req) => {
 
     // Handle geocoding requests (forward and reverse)
     if (type === 'geocode') {
-      if (!query) {
-        throw new Error('Query parameter is required for geocoding');
+      if (!query || !validateQuery(query)) {
+        throw new Error('Query parameter is required and must be between 1-200 characters');
       }
       
       console.log('Geocoding request for:', query);
@@ -50,6 +77,10 @@ serve(async (req) => {
         throw new Error('Latitude and longitude are required for reverse geocoding');
       }
       
+      if (!validateCoordinates(latitude, longitude)) {
+        throw new Error('Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180');
+      }
+      
       console.log('Reverse geocoding for:', latitude, longitude);
       
       const reverseUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${OPENWEATHER_API_KEY}`;
@@ -71,6 +102,10 @@ serve(async (req) => {
 
     if (!latitude || !longitude) {
       throw new Error('Latitude and longitude are required');
+    }
+
+    if (!validateCoordinates(latitude, longitude)) {
+      throw new Error('Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180');
     }
 
     let weatherData;
@@ -105,7 +140,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
-        status: 500,
+        status: error instanceof Error && error.message.startsWith('Unauthorized') ? 401 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
