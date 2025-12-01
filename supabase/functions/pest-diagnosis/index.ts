@@ -6,9 +6,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation
+const validateImageUrl = (url: string): boolean => {
+  if (!url || url.length > 2000) return false;
+  
+  try {
+    const parsedUrl = new URL(url);
+    // Only allow HTTPS and specific domains (Supabase storage)
+    if (parsedUrl.protocol !== 'https:') return false;
+    
+    // Allow Supabase storage URLs
+    const allowedDomains = [
+      'supabase.co',
+      'btspzagknvsbzyhwfvkh.supabase.co'
+    ];
+    
+    const isAllowed = allowedDomains.some(domain => 
+      parsedUrl.hostname.endsWith(domain)
+    );
+    
+    return isAllowed;
+  } catch {
+    return false;
+  }
+};
+
+const validateCropType = (cropType?: string): boolean => {
+  if (!cropType) return true; // optional
+  return cropType.length > 0 && cropType.length <= 100;
+};
+
 // Helper function to clean markdown formatting from JSON responses
 function cleanJsonResponse(content: string): string {
-  // Remove markdown code blocks if present
   let cleaned = content.trim();
   if (cleaned.startsWith('```json')) {
     cleaned = cleaned.replace(/^```json\s*/, '').replace(/```\s*$/, '');
@@ -25,6 +54,15 @@ serve(async (req) => {
 
   try {
     const { imageUrl, cropType } = await req.json();
+
+    // Validate inputs
+    if (!validateImageUrl(imageUrl)) {
+      throw new Error('Invalid image URL: must be a valid HTTPS URL from allowed storage');
+    }
+
+    if (!validateCropType(cropType)) {
+      throw new Error('Invalid crop type: must be 1-100 characters');
+    }
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
