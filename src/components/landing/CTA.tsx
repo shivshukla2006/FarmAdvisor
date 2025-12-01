@@ -13,7 +13,7 @@ export const CTA = () => {
           <p className="text-xl opacity-90">
             Join thousands of farmers using AI-powered insights to grow better crops and increase profits.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <div className="flex justify-center pt-4">
             <Button 
               size="lg" 
               className="text-lg h-12 px-8 bg-background text-foreground hover:bg-background/90"
@@ -23,13 +23,6 @@ export const CTA = () => {
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-lg h-12 px-8 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              Contact Sales
             </Button>
           </div>
         </div>
