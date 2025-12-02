@@ -21,23 +21,6 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Unauthorized: Missing authorization header');
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Unauthorized: Invalid token');
-    }
-
     const { latitude, longitude, type = 'current', query } = await req.json();
     const OPENWEATHER_API_KEY = Deno.env.get('OPENWEATHER_API_KEY');
 

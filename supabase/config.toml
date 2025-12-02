@@ -1,7 +1,7 @@
 project_id = "btspzagknvsbzyhwfvkh"
 
 [functions.weather]
-verify_jwt = true
+verify_jwt = false
 
 [functions.crop-recommendation]
 verify_jwt = true
