@@ -90,18 +90,24 @@ const Weather = () => {
 
     setIsFetchingSuggestions(true);
     try {
+      // Append ",IN" to search only Indian cities
       const { data, error } = await supabase.functions.invoke("weather", {
-        body: { type: "geocode", query: query.trim() },
+        body: { type: "geocode", query: `${query.trim()},IN` },
       });
 
       if (!error && data && Array.isArray(data)) {
-        setSuggestions(data.slice(0, 5).map((item: any) => ({
-          name: item.name,
-          state: item.state,
-          country: item.country,
-          lat: item.lat,
-          lon: item.lon,
-        })));
+        // Filter to only show Indian cities
+        const indianCities = data
+          .filter((item: any) => item.country === "IN")
+          .slice(0, 5)
+          .map((item: any) => ({
+            name: item.name,
+            state: item.state,
+            country: item.country,
+            lat: item.lat,
+            lon: item.lon,
+          }));
+        setSuggestions(indianCities);
       } else {
         setSuggestions([]);
       }
