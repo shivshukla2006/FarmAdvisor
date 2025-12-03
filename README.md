@@ -197,8 +197,8 @@ The following secrets are configured in Lovable Cloud:
 
 This project uses bidirectional GitHub sync with Lovable:
 
-1. **Via Lovable Editor**
-   - Visit the [Lovable Project](https://lovable.dev/projects/caf03530-ce64-42fa-9dfd-80c249d1dfa3)
+1. **Via Direct Link**
+   - Visit the https://farm-advisor-ten.vercel.app/
    - Changes automatically commit to GitHub
 
 2. **Via Local Development**
@@ -218,22 +218,7 @@ The app includes comprehensive error handling:
 - Network request monitoring
 - Real-time database query logging
 
-## 📚 Documentation
 
-- [Lovable Documentation](https://docs.lovable.dev/)
-- [Lovable Cloud Features](https://docs.lovable.dev/features/cloud)
-- [Lovable AI Features](https://docs.lovable.dev/features/ai)
-- [Project Settings](https://lovable.dev/projects/caf03530-ce64-42fa-9dfd-80c249d1dfa3)
-
-## 📄 License
-
-This project is built with [Lovable](https://lovable.dev) - the world's first AI full-stack engineer.
-
-## 🙋 Support
-
-- [Lovable Community Discord](https://discord.com/channels/1119885301872070706/1280461670979993613)
-- [YouTube Tutorial Playlist](https://www.youtube.com/watch?v=9KHLTZaJcR8&list=PLbVHz4urQBZkJiAWdG8HWoJTdgEysigIO)
-- [Lovable Documentation](https://docs.lovable.dev/)
 
 ---
 
