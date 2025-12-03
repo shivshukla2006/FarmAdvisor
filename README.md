@@ -218,8 +218,4 @@ The app includes comprehensive error handling:
 - Network request monitoring
 - Real-time database query logging
 
-
-
----
-
 **Built with ❤️ using Lovable - Empowering farmers with AI-driven agricultural insights**
