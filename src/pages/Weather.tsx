@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherData, type ForecastData } from "@/services/weatherService";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LocationSuggestion {
   name: string;
@@ -49,7 +50,7 @@ const getWeatherIcon = (description: string) => {
 };
 
 const Weather = () => {
-  const [location, setLocation] = useState("Fetching location...");
+  const [location, setLocation] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
@@ -69,6 +70,7 @@ const Weather = () => {
     frost: true,
   });
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Close suggestions on click outside
   useEffect(() => {
@@ -141,16 +143,16 @@ const Weather = () => {
     setShowSuggestions(false);
     
     toast({
-      title: "Location Updated",
-      description: `Now showing weather for ${locationName}`,
+      title: t("locationUpdated"),
+      description: `${t("nowShowingWeatherFor")} ${locationName}`,
     });
   };
 
   const searchLocation = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a location name",
+        title: t("error"),
+        description: t("pleaseEnterLocation"),
         variant: "destructive",
       });
       return;
@@ -173,8 +175,8 @@ const Weather = () => {
 
       if (!data || data.length === 0) {
         toast({
-          title: "Not Found",
-          description: "Location not found. Please try searching with city name (e.g., 'Mumbai', 'Delhi', 'London')",
+          title: t("notFound"),
+          description: t("locationNotFound"),
           variant: "destructive",
         });
         return;
@@ -186,14 +188,14 @@ const Weather = () => {
       setLocationInput("");
       
       toast({
-        title: "Location Updated",
-        description: `Now showing weather for ${result.name}, ${result.country}`,
+        title: t("locationUpdated"),
+        description: `${t("nowShowingWeatherFor")} ${result.name}, ${result.country}`,
       });
     } catch (error) {
       console.error("Error searching location:", error);
       toast({
-        title: "Search Failed",
-        description: error instanceof Error ? error.message : "Failed to search location. Please try again.",
+        title: t("searchFailed"),
+        description: error instanceof Error ? error.message : t("failedToSearch"),
         variant: "destructive",
       });
     } finally {
@@ -233,21 +235,21 @@ const Weather = () => {
   const getUserLocation = () => {
     if (!navigator.geolocation) {
       toast({
-        title: "Error",
+        title: t("error"),
         description: "Geolocation is not supported by your browser",
         variant: "destructive",
       });
       return;
     }
 
-    setLocation("Detecting your location...");
+    setLocation(t("detectingLocation"));
     
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         setCoordinates({ lat, lon });
-        setLocation("Fetching location name...");
+        setLocation(t("fetchingLocationName"));
         
         // Get proper location name using reverse geocoding
         try {
@@ -259,22 +261,22 @@ const Weather = () => {
             const locationName = `${data[0].name}${data[0].state ? ', ' + data[0].state : ''}, ${data[0].country}`;
             setLocation(locationName);
             toast({
-              title: "Location Found",
-              description: `Loading weather data for ${locationName}`,
+              title: t("locationFound"),
+              description: `${t("loadingWeatherFor")} ${locationName}`,
             });
           } else {
-            setLocation("Your Location");
+            setLocation(t("yourLocation"));
           }
         } catch (error) {
           console.error("Error getting location name:", error);
-          setLocation("Your Location");
+          setLocation(t("yourLocation"));
         }
       },
       (error) => {
         console.error("Error getting location:", error);
         toast({
-          title: "Location Access Denied",
-          description: "Using default location (Pune, India). Enable location access for accurate alerts.",
+          title: t("locationAccessDenied"),
+          description: t("usingDefaultLocation"),
           variant: "destructive",
         });
         setLocation("Pune, Maharashtra, IN");
@@ -298,47 +300,47 @@ const Weather = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-heading font-bold mb-2">Weather Alerts</h1>
+            <h1 className="text-3xl font-heading font-bold mb-2">{t("weatherAlerts")}</h1>
             <p className="text-muted-foreground">
-              Real-time weather updates and agricultural alerts for your region
+              {t("weatherDescription")}
             </p>
           </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                {t("settings")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Weather Settings</DialogTitle>
+                <DialogTitle>{t("weatherSettings")}</DialogTitle>
                 <DialogDescription>
-                  Manage your location and notification preferences
+                  {t("manageLocationAndNotifications")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Current Location</Label>
+                  <Label htmlFor="location">{t("currentLocation")}</Label>
                   <div className="flex gap-2 mb-4">
                     <Input
                       id="current-location"
-                      value={location}
+                      value={location || t("fetchingLocation")}
                       disabled
                       className="flex-1"
                     />
-                    <Button variant="outline" size="icon" onClick={getUserLocation} title="Use my current location">
+                    <Button variant="outline" size="icon" onClick={getUserLocation} title={t("currentLocation")}>
                       <MapPin className="h-4 w-4" />
                     </Button>
                   </div>
                   
-                  <Label htmlFor="search-location">Search Location</Label>
+                  <Label htmlFor="search-location">{t("searchLocation")}</Label>
                   <div className="relative" ref={searchContainerRef}>
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <Input
                           id="search-location"
-                          placeholder="Enter city name..."
+                          placeholder={t("enterCityName")}
                           value={locationInput}
                           onChange={(e) => handleInputChange(e.target.value)}
                           onFocus={() => setShowSuggestions(true)}
@@ -357,7 +359,7 @@ const Weather = () => {
                             {isFetchingSuggestions ? (
                               <div className="flex items-center justify-center py-4">
                                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                                <span className="ml-2 text-sm text-muted-foreground">{t("searching")}</span>
                               </div>
                             ) : suggestions.length > 0 ? (
                               <ul className="py-1">
@@ -378,7 +380,7 @@ const Weather = () => {
                               </ul>
                             ) : locationInput.length >= 2 ? (
                               <div className="py-4 text-center text-sm text-muted-foreground">
-                                No cities found
+                                {t("noCitiesFound")}
                               </div>
                             ) : null}
                           </div>
@@ -394,20 +396,20 @@ const Weather = () => {
                         }}
                         disabled={isSearching}
                       >
-                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : t("search")}
                       </Button>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Start typing to see city suggestions
+                    {t("startTypingForSuggestions")}
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  <Label>Alert Notifications</Label>
+                  <Label>{t("alertNotifications")}</Label>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="rain" className="cursor-pointer">Rain Alerts</Label>
+                      <Label htmlFor="rain" className="cursor-pointer">{t("rainAlerts")}</Label>
                       <Switch
                         id="rain"
                         checked={notifications.rain}
@@ -415,7 +417,7 @@ const Weather = () => {
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="temp" className="cursor-pointer">Temperature Alerts</Label>
+                      <Label htmlFor="temp" className="cursor-pointer">{t("temperatureAlerts")}</Label>
                       <Switch
                         id="temp"
                         checked={notifications.temperature}
@@ -423,7 +425,7 @@ const Weather = () => {
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="wind" className="cursor-pointer">Wind Alerts</Label>
+                      <Label htmlFor="wind" className="cursor-pointer">{t("windAlerts")}</Label>
                       <Switch
                         id="wind"
                         checked={notifications.wind}
@@ -431,7 +433,7 @@ const Weather = () => {
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="frost" className="cursor-pointer">Frost Alerts</Label>
+                      <Label htmlFor="frost" className="cursor-pointer">{t("frostAlerts")}</Label>
                       <Switch
                         id="frost"
                         checked={notifications.frost}
@@ -447,7 +449,7 @@ const Weather = () => {
 
         {/* Active Alerts */}
         <Card className="p-6">
-          <h2 className="text-xl font-heading font-semibold mb-4">Active Weather Alerts</h2>
+          <h2 className="text-xl font-heading font-semibold mb-4">{t("activeWeatherAlerts")}</h2>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -479,8 +481,8 @@ const Weather = () => {
           ) : (
             <div className="text-center py-8">
               <AlertTriangle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-              <p className="text-muted-foreground">No active weather alerts for your location</p>
-              <p className="text-sm text-muted-foreground mt-1">We'll notify you when weather conditions change</p>
+              <p className="text-muted-foreground">{t("noActiveAlerts")}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t("willNotifyWhenChange")}</p>
             </div>
           )}
         </Card>
@@ -489,7 +491,7 @@ const Weather = () => {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="h-5 w-5 text-muted-foreground" />
-            <span className="text-lg font-medium">{location}</span>
+            <span className="text-lg font-medium">{location || t("fetchingLocation")}</span>
           </div>
 
           {isLoading ? (
@@ -513,35 +515,35 @@ const Weather = () => {
                 <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                   <Droplets className="h-8 w-8 text-primary mb-2" />
                   <div className="text-2xl font-bold">{currentWeather.humidity}%</div>
-                  <div className="text-sm text-muted-foreground">Humidity</div>
+                  <div className="text-sm text-muted-foreground">{t("humidity")}</div>
                 </div>
                 <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                   <Wind className="h-8 w-8 text-secondary mb-2" />
                   <div className="text-2xl font-bold">{Math.round(currentWeather.windSpeed)} km/h</div>
-                  <div className="text-sm text-muted-foreground">Wind Speed</div>
+                  <div className="text-sm text-muted-foreground">{t("windSpeed")}</div>
                 </div>
                 <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                   <CloudRain className="h-8 w-8 text-primary mb-2" />
                   <div className="text-2xl font-bold">{currentWeather.precipitation}%</div>
-                  <div className="text-sm text-muted-foreground">Precipitation</div>
+                  <div className="text-sm text-muted-foreground">{t("precipitation")}</div>
                 </div>
                 <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
                   <Eye className="h-8 w-8 text-muted-foreground mb-2" />
                   <div className="text-2xl font-bold">{(currentWeather.windSpeed / 10).toFixed(1)} km</div>
-                  <div className="text-sm text-muted-foreground">Visibility</div>
+                  <div className="text-sm text-muted-foreground">{t("visibility")}</div>
                 </div>
               </div>
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              Failed to load weather data
+              {t("failedToLoadWeather")}
             </div>
           )}
         </Card>
 
         {/* 7-Day Forecast */}
         <Card className="p-6">
-          <h2 className="text-xl font-heading font-semibold mb-4">7-Day Forecast</h2>
+          <h2 className="text-xl font-heading font-semibold mb-4">{t("sevenDayForecast")}</h2>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -571,39 +573,45 @@ const Weather = () => {
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              No forecast data available
+              {t("failedToLoadWeather")}
             </div>
           )}
         </Card>
 
         {/* Agricultural Impact */}
         <Card className="p-6">
-          <h2 className="text-xl font-heading font-semibold mb-4">Agricultural Impact Analysis</h2>
+          <h2 className="text-xl font-heading font-semibold mb-4">{t("agriculturalImpact")}</h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <div className="h-2 w-2 rounded-full bg-primary mt-2" />
               <div>
-                <div className="font-medium mb-1">Irrigation Recommendation</div>
+                <div className="font-medium mb-1">{t("generalRecommendations")}</div>
                 <p className="text-sm text-muted-foreground">
-                  With 40% chance of rain, consider delaying irrigation for 2-3 days to conserve water.
+                  {t("monitorSoilMoisture")}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="h-2 w-2 rounded-full bg-primary mt-2" />
               <div>
-                <div className="font-medium mb-1">Crop Protection</div>
                 <p className="text-sm text-muted-foreground">
-                  High humidity levels may increase fungal disease risk. Monitor crops closely and ensure proper ventilation.
+                  {t("planIrrigationBased")}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="h-2 w-2 rounded-full bg-primary mt-2" />
               <div>
-                <div className="font-medium mb-1">Field Operations</div>
                 <p className="text-sm text-muted-foreground">
-                  Weather conditions are favorable for field work today and tomorrow. Plan accordingly for planting or harvesting activities.
+                  {t("protectCropsFromExtreme")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-2 w-2 rounded-full bg-primary mt-2" />
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {t("checkPestActivity")}
                 </p>
               </div>
             </div>
