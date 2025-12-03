@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherData, type ForecastData } from "@/services/weatherService";
 import { Loader2 } from "lucide-react";
+
+interface LocationSuggestion {
+  name: string;
+  state?: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
 import {
   Sun,
   Cloud,
@@ -49,6 +57,11 @@ const Weather = () => {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState({
     rain: true,
     temperature: true,
@@ -56,6 +69,76 @@ const Weather = () => {
     frost: true,
   });
   const { toast } = useToast();
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchSuggestions = async (query: string) => {
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsFetchingSuggestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("weather", {
+        body: { type: "geocode", query: query.trim() },
+      });
+
+      if (!error && data && Array.isArray(data)) {
+        setSuggestions(data.slice(0, 5).map((item: any) => ({
+          name: item.name,
+          state: item.state,
+          country: item.country,
+          lat: item.lat,
+          lon: item.lon,
+        })));
+      } else {
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      setSuggestions([]);
+    } finally {
+      setIsFetchingSuggestions(false);
+    }
+  };
+
+  const handleInputChange = (value: string) => {
+    setLocationInput(value);
+    setShowSuggestions(true);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      fetchSuggestions(value);
+    }, 300);
+  };
+
+  const selectSuggestion = (suggestion: LocationSuggestion) => {
+    setCoordinates({ lat: suggestion.lat, lon: suggestion.lon });
+    const locationName = `${suggestion.name}${suggestion.state ? ', ' + suggestion.state : ''}, ${suggestion.country}`;
+    setLocation(locationName);
+    setLocationInput("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    
+    toast({
+      title: "Location Updated",
+      description: `Now showing weather for ${locationName}`,
+    });
+  };
 
   const searchLocation = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -244,28 +327,73 @@ const Weather = () => {
                   </div>
                   
                   <Label htmlFor="search-location">Search Location</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="search-location"
-                      placeholder="Enter city name..."
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          searchLocation(locationInput);
-                        }
-                      }}
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={() => searchLocation(locationInput)}
-                      disabled={isSearching}
-                    >
-                      {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-                    </Button>
+                  <div className="relative" ref={searchContainerRef}>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="search-location"
+                          placeholder="Enter city name..."
+                          value={locationInput}
+                          onChange={(e) => handleInputChange(e.target.value)}
+                          onFocus={() => setShowSuggestions(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && suggestions.length > 0) {
+                              selectSuggestion(suggestions[0]);
+                            } else if (e.key === 'Escape') {
+                              setShowSuggestions(false);
+                            }
+                          }}
+                          className="w-full"
+                          autoComplete="off"
+                        />
+                        {showSuggestions && (locationInput.length >= 2 || suggestions.length > 0) && (
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg overflow-hidden">
+                            {isFetchingSuggestions ? (
+                              <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                              </div>
+                            ) : suggestions.length > 0 ? (
+                              <ul className="py-1">
+                                {suggestions.map((suggestion, index) => (
+                                  <li
+                                    key={`${suggestion.lat}-${suggestion.lon}-${index}`}
+                                    className="px-3 py-2 hover:bg-accent cursor-pointer text-sm flex items-center gap-2"
+                                    onClick={() => selectSuggestion(suggestion)}
+                                  >
+                                    <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <span>
+                                      {suggestion.name}
+                                      {suggestion.state && <span className="text-muted-foreground">, {suggestion.state}</span>}
+                                      <span className="text-muted-foreground">, {suggestion.country}</span>
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : locationInput.length >= 2 ? (
+                              <div className="py-4 text-center text-sm text-muted-foreground">
+                                No cities found
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                      <Button 
+                        onClick={() => {
+                          if (suggestions.length > 0) {
+                            selectSuggestion(suggestions[0]);
+                          } else {
+                            searchLocation(locationInput);
+                          }
+                        }}
+                        disabled={isSearching}
+                      >
+                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Enter a city name and press Enter or click Search
+                    Start typing to see city suggestions
                   </p>
                 </div>
 
