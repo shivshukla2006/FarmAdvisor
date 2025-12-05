@@ -2,13 +2,13 @@ import { Sprout } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="py-12 px-4 bg-muted/30 border-t">
+    <footer className="py-12 px-4 bg-white/95 backdrop-blur-sm border-t">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Sprout className="h-6 w-6 text-primary" />
-              <span className="font-heading font-bold text-lg">FarmAdvisor</span>
+              <span className="font-heading font-bold text-lg text-foreground">FarmAdvisor</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Empowering farmers with AI-driven insights for better agriculture.
@@ -16,7 +16,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Product</h3>
+            <h3 className="font-heading font-semibold mb-4 text-foreground">Product</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
@@ -26,7 +26,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Company</h3>
+            <h3 className="font-heading font-semibold mb-4 text-foreground">Company</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
@@ -36,7 +36,7 @@ export const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-heading font-semibold mb-4">Legal</h3>
+            <h3 className="font-heading font-semibold mb-4 text-foreground">Legal</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
