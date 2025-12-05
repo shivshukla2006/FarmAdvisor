@@ -5,6 +5,7 @@ import { ChatbotButton } from "./ChatbotButton";
 import { WeatherAlertBanner } from "./WeatherAlertBanner";
 import { DashboardFooter } from "./DashboardFooter";
 import { ChatbotProvider } from "@/contexts/ChatbotContext";
+import cropsBg from "@/assets/crops-bg.jpg";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -15,7 +16,11 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <ChatbotProvider>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-fixed flex flex-col"
+        style={{ backgroundImage: `url(${cropsBg})` }}
+      >
+        <div className="min-h-screen bg-background/90 backdrop-blur-sm flex flex-col">
         <WeatherAlertBanner />
         <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
@@ -31,6 +36,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <DashboardFooter />
         <ChatbotButton />
+        </div>
       </div>
     </ChatbotProvider>
   );
