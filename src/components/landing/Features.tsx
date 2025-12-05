@@ -36,10 +36,10 @@ const features = [
 
 export const Features = () => {
   return (
-    <section className="py-20 px-4 bg-muted/30">
+    <section className="py-20 px-4 bg-white/95 backdrop-blur-sm">
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-foreground">
             Everything You Need for
             <span className="text-primary"> Successful Farming</span>
           </h2>
@@ -57,7 +57,7 @@ export const Features = () => {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <feature.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-heading font-semibold mb-2">{feature.title}</h3>
+              <h3 className="text-xl font-heading font-semibold mb-2 text-card-foreground">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
             </Card>
           ))}
