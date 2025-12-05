@@ -6,6 +6,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 import { Sprout } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import cropsBg from "@/assets/crops-bg.jpg";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<string>("login");
@@ -19,15 +20,18 @@ const Auth = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/30">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-12 bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${cropsBg})` }}
+    >
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+      <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <Sprout className="h-8 w-8 text-primary" />
-            <span className="font-heading font-bold text-2xl">FarmAdvisor</span>
+            <span className="font-heading font-bold text-2xl text-white">FarmAdvisor</span>
           </Link>
-          <h1 className="text-3xl font-heading font-bold mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to access your farm dashboard</p>
+          <h1 className="text-3xl font-heading font-bold mb-2 text-white">Welcome Back</h1>
+          <p className="text-white/80">Sign in to access your farm dashboard</p>
         </div>
 
         <Card className="p-6 bg-card border-border">
@@ -47,11 +51,11 @@ const Auth = () => {
           </Tabs>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-4">
+        <p className="text-center text-sm text-white/70 mt-4">
           By continuing, you agree to our{" "}
-          <a href="#" className="text-primary hover:underline">Terms of Service</a>
+          <a href="#" className="text-white hover:underline">Terms of Service</a>
           {" "}and{" "}
-          <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+          <a href="#" className="text-white hover:underline">Privacy Policy</a>
         </p>
       </div>
     </div>
