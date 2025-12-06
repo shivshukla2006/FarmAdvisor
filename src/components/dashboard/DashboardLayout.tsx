@@ -20,7 +20,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         className="min-h-screen bg-cover bg-center bg-fixed flex flex-col"
         style={{ backgroundImage: `url(${cropsBg})` }}
       >
-        <div className="min-h-screen bg-background/95 backdrop-blur-sm flex flex-col">
+        <div className="min-h-screen bg-gradient-to-br from-background/98 via-background/95 to-background/90 backdrop-blur-sm flex flex-col">
         <WeatherAlertBanner />
         <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
