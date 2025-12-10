@@ -34,7 +34,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </main>
         </div>
         
-        <DashboardFooter />
+        <div className="mt-auto bg-background/95 backdrop-blur-md">
+          <DashboardFooter />
+        </div>
         <ChatbotButton />
         </div>
       </div>
