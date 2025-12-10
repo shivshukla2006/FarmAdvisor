@@ -51,55 +51,61 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 lg:hidden border-b border-sidebar-border/50">
-            <span className="font-heading font-semibold text-sidebar-foreground">Menu</span>
-            <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-sidebar-accent">
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={onClose}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
-                    isActive
-                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium shadow-md shadow-primary/20"
-                      : "hover:bg-sidebar-accent/60 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:translate-x-1"
-                  )}
-                >
-                  <item.icon className={cn(
-                    "h-5 w-5 transition-transform duration-200",
-                    !isActive && "group-hover:scale-110"
-                  )} />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="p-4 border-t border-sidebar-border/50">
-            <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-xl p-4 border border-primary/20">
-              <div className="text-sm font-heading font-semibold mb-1 text-sidebar-foreground">{t("needHelp")}</div>
-              <div className="text-xs text-sidebar-foreground/60 mb-3">
-                {t("chatWithAI")}
-              </div>
-              <Button 
-                size="sm" 
-                className="w-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30" 
-                onClick={() => {
-                  openChatbot();
-                  onClose();
-                }}
-              >
-                {t("getSupport")}
+        <div className="flex flex-col h-full p-3">
+          {/* Inner container with distinct background */}
+          <div className="flex flex-col h-full bg-card/60 rounded-2xl border border-border/30 shadow-inner overflow-hidden">
+            {/* Mobile header */}
+            <div className="flex items-center justify-between p-4 lg:hidden border-b border-border/30">
+              <span className="font-heading font-semibold text-sidebar-foreground">Menu</span>
+              <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-sidebar-accent">
+                <X className="h-5 w-5" />
               </Button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                      isActive
+                        ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium shadow-md shadow-primary/20"
+                        : "hover:bg-sidebar-accent/80 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:translate-x-1"
+                    )}
+                  >
+                    <item.icon className={cn(
+                      "h-5 w-5 transition-transform duration-200",
+                      !isActive && "group-hover:scale-110"
+                    )} />
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Help section */}
+            <div className="p-3 border-t border-border/30">
+              <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent rounded-xl p-4 border border-primary/20">
+                <div className="text-sm font-heading font-semibold mb-1 text-sidebar-foreground">{t("needHelp")}</div>
+                <div className="text-xs text-sidebar-foreground/60 mb-3">
+                  {t("chatWithAI")}
+                </div>
+                <Button 
+                  size="sm" 
+                  className="w-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30" 
+                  onClick={() => {
+                    openChatbot();
+                    onClose();
+                  }}
+                >
+                  {t("getSupport")}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
