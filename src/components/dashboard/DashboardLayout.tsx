@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import { cn } from "@/lib/utils";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { ChatbotButton } from "./ChatbotButton";
@@ -27,7 +28,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex flex-1 pt-16">
           <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           
-          <main className="flex-1 p-4 md:p-6 lg:p-8 lg:ml-64">
+          <main className={cn(
+            "flex-1 p-4 md:p-6 lg:p-8 transition-all duration-300",
+            sidebarOpen && "lg:ml-64"
+          )}>
             <div className="max-w-7xl mx-auto">
               {children}
             </div>
