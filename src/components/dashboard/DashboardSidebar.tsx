@@ -47,19 +47,19 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-16 left-0 bottom-0 z-40 w-64 bg-card border-r border-border transition-transform duration-300 lg:translate-x-0",
+          "fixed top-16 left-0 bottom-0 z-40 w-64 bg-gradient-to-b from-sidebar-background/98 via-sidebar-background/95 to-sidebar-background/90 backdrop-blur-md border-r border-sidebar-border/50 transition-transform duration-300 lg:translate-x-0 shadow-xl shadow-primary/5",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 lg:hidden">
-            <span className="font-heading font-semibold">Menu</span>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+          <div className="flex items-center justify-between p-4 lg:hidden border-b border-sidebar-border/50">
+            <span className="font-heading font-semibold text-sidebar-foreground">Menu</span>
+            <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-sidebar-accent">
               <X className="h-5 w-5" />
             </Button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -68,29 +68,31 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
                   to={item.path}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                     isActive
-                      ? "bg-primary text-primary-foreground font-medium"
-                      : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium shadow-md shadow-primary/20"
+                      : "hover:bg-sidebar-accent/60 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:translate-x-1"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
+                  <item.icon className={cn(
+                    "h-5 w-5 transition-transform duration-200",
+                    !isActive && "group-hover:scale-110"
+                  )} />
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="p-4 border-t">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <div className="text-sm font-medium mb-1">{t("needHelp")}</div>
-              <div className="text-xs text-muted-foreground mb-3">
+          <div className="p-4 border-t border-sidebar-border/50">
+            <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-xl p-4 border border-primary/20">
+              <div className="text-sm font-heading font-semibold mb-1 text-sidebar-foreground">{t("needHelp")}</div>
+              <div className="text-xs text-sidebar-foreground/60 mb-3">
                 {t("chatWithAI")}
               </div>
               <Button 
                 size="sm" 
-                className="w-full" 
-                variant="outline"
+                className="w-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/30" 
                 onClick={() => {
                   openChatbot();
                   onClose();
