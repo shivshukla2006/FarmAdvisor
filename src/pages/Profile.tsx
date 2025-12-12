@@ -34,6 +34,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Loader2, User, Bell, Globe, Lock, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -57,8 +66,13 @@ const Profile = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [weatherAlerts, setWeatherAlerts] = useState(true);
   const [communityUpdates, setCommunityUpdates] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, deleteAccount, updatePassword, signOut } = useAuth();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -148,12 +162,66 @@ const Profile = () => {
     setIsLoading(false);
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      title: "Account Deletion",
-      description: "This feature will be available in Phase 5.",
-      variant: "destructive",
-    });
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    
+    const { error } = await deleteAccount();
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete account. Please try again.",
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+    } else {
+      toast({
+        title: "Account Deleted",
+        description: "Your account and all associated data have been deleted.",
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast({
+        title: "Invalid Password",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+    
+    const { error } = await updatePassword(newPassword);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Password Updated",
+        description: "Your password has been successfully changed.",
+      });
+      setShowPasswordDialog(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+    
+    setIsChangingPassword(false);
   };
 
   return (
@@ -401,17 +469,75 @@ const Profile = () => {
             </div>
 
             <div className="space-y-4">
-              <Button variant="outline" className="w-full justify-start">
-                Change Password
-              </Button>
+              <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    Change Password
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-card border-border">
+                  <DialogHeader>
+                    <DialogTitle>Change Password</DialogTitle>
+                    <DialogDescription>
+                      Enter your new password below.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <label className="text-sm font-medium">New Password</label>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Confirm Password</label>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+                      {isChangingPassword ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Password"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               
               <Separator />
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full justify-start">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Account
+                  <Button variant="destructive" className="w-full justify-start" disabled={isDeleting}>
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Account
+                      </>
+                    )}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="bg-card border-border">
@@ -419,7 +545,7 @@ const Profile = () => {
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
                       This action cannot be undone. This will permanently delete your account
-                      and remove your data from our servers.
+                      and remove all your data including recommendations, diagnoses, posts, and bookmarks.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
