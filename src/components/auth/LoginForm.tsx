@@ -13,8 +13,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -26,7 +36,46 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
   const { toast } = useToast();
+
+  const handleForgotPassword = async () => {
+    if (!forgotPasswordEmail) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingReset(true);
+    
+    const redirectUrl = `${window.location.origin}/auth?reset=true`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      redirectTo: redirectUrl,
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Reset Email Sent",
+        description: "Check your email for a password reset link.",
+      });
+      setIsForgotPasswordOpen(false);
+      setForgotPasswordEmail("");
+    }
+    
+    setIsSendingReset(false);
+  };
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -39,11 +88,6 @@ export const LoginForm = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    
-    const { signIn } = await import('@/contexts/AuthContext').then(m => ({ signIn: () => {} }));
-    
-    // Import supabase client
-    const { supabase } = await import('@/integrations/supabase/client');
     
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
@@ -130,9 +174,45 @@ export const LoginForm = () => {
             )}
           />
 
-          <a href="#" className="text-sm text-primary hover:underline">
-            Forgot password?
-          </a>
+          <Dialog open={isForgotPasswordOpen} onOpenChange={setIsForgotPasswordOpen}>
+            <DialogTrigger asChild>
+              <button type="button" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-border">
+              <DialogHeader>
+                <DialogTitle>Reset Password</DialogTitle>
+                <DialogDescription>
+                  Enter your email address and we'll send you a link to reset your password.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <Input
+                  type="email"
+                  placeholder="farmer@example.com"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  disabled={isSendingReset}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsForgotPasswordOpen(false)} disabled={isSendingReset}>
+                  Cancel
+                </Button>
+                <Button onClick={handleForgotPassword} disabled={isSendingReset}>
+                  {isSendingReset ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Reset Link"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>

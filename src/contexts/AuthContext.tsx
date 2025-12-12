@@ -10,6 +10,9 @@ interface AuthContextType {
   signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  deleteAccount: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,6 +88,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     navigate('/');
   };
 
+  const resetPassword = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/auth?reset=true`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    
+    return { error };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    
+    return { error };
+  };
+
+  const deleteAccount = async () => {
+    // First delete the user's profile data
+    if (user) {
+      await supabase.from('profiles').delete().eq('id', user.id);
+      await supabase.from('crop_recommendations').delete().eq('user_id', user.id);
+      await supabase.from('pest_diagnoses').delete().eq('user_id', user.id);
+      await supabase.from('user_activities').delete().eq('user_id', user.id);
+      await supabase.from('scheme_bookmarks').delete().eq('user_id', user.id);
+      await supabase.from('community_posts').delete().eq('user_id', user.id);
+      await supabase.from('community_replies').delete().eq('user_id', user.id);
+    }
+    
+    // Sign out the user (Supabase doesn't allow self-deletion from client)
+    await supabase.auth.signOut();
+    navigate('/');
+    
+    return { error: null };
+  };
+
   const value = {
     user,
     session,
@@ -92,6 +132,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUp,
     signIn,
     signOut,
+    resetPassword,
+    updatePassword,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
