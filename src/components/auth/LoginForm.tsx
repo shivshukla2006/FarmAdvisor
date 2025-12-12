@@ -37,45 +37,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const [isSendingReset, setIsSendingReset] = useState(false);
   const { toast } = useToast();
-
-  const handleForgotPassword = async () => {
-    if (!forgotPasswordEmail) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSendingReset(true);
-    
-    const redirectUrl = `${window.location.origin}/auth?reset=true`;
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
-      redirectTo: redirectUrl,
-    });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Reset Email Sent",
-        description: "Check your email for a password reset link.",
-      });
-      setIsForgotPasswordOpen(false);
-      setForgotPasswordEmail("");
-    }
-    
-    setIsSendingReset(false);
-  };
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -184,31 +146,12 @@ export const LoginForm = () => {
               <DialogHeader>
                 <DialogTitle>Reset Password</DialogTitle>
                 <DialogDescription>
-                  Enter your email address and we'll send you a link to reset your password.
+                  Please contact support to reset your password.
                 </DialogDescription>
               </DialogHeader>
-              <div className="py-4">
-                <Input
-                  type="email"
-                  placeholder="farmer@example.com"
-                  value={forgotPasswordEmail}
-                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                  disabled={isSendingReset}
-                />
-              </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsForgotPasswordOpen(false)} disabled={isSendingReset}>
-                  Cancel
-                </Button>
-                <Button onClick={handleForgotPassword} disabled={isSendingReset}>
-                  {isSendingReset ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Send Reset Link"
-                  )}
+                <Button onClick={() => setIsForgotPasswordOpen(false)}>
+                  Close
                 </Button>
               </DialogFooter>
             </DialogContent>
