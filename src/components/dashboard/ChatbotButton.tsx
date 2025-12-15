@@ -26,8 +26,39 @@ export const ChatbotButton = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Show welcome popup after page loads
+  useEffect(() => {
+    const hasSeenPopup = sessionStorage.getItem("kisanMitraPopupSeen");
+    if (!hasSeenPopup && !isOpen) {
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Auto-hide popup after 8 seconds
+  useEffect(() => {
+    if (showWelcomePopup) {
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(false);
+        sessionStorage.setItem("kisanMitraPopupSeen", "true");
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcomePopup]);
+
+  // Hide popup when chatbot opens
+  useEffect(() => {
+    if (isOpen && showWelcomePopup) {
+      setShowWelcomePopup(false);
+      sessionStorage.setItem("kisanMitraPopupSeen", "true");
+    }
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -216,6 +247,38 @@ export const ChatbotButton = () => {
             </Button>
           </div>
         </Card>
+      )}
+      
+      {/* Welcome Popup */}
+      {showWelcomePopup && !isOpen && (
+        <div className="fixed top-20 right-20 z-50 animate-fade-in">
+          <div className="relative bg-card border border-border rounded-xl shadow-lg p-4 max-w-[220px]">
+            {/* Arrow pointing to button */}
+            <div className="absolute -right-2 top-4 w-0 h-0 border-t-8 border-b-8 border-l-8 border-transparent border-l-card"></div>
+            <div className="absolute -right-[9px] top-4 w-0 h-0 border-t-8 border-b-8 border-l-8 border-transparent border-l-border"></div>
+            
+            <div className="flex items-start gap-3">
+              <div className="text-3xl animate-bounce-slow">👨‍🌾</div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Any problem?</p>
+                <p className="text-sm text-primary font-semibold">Ask {CHATBOT_NAME}!</p>
+                <p className="text-xs text-muted-foreground mt-1">Click the button to chat</p>
+              </div>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-muted"
+              onClick={() => {
+                setShowWelcomePopup(false);
+                sessionStorage.setItem("kisanMitraPopupSeen", "true");
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
       )}
       
       <Button
