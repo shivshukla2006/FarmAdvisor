@@ -104,6 +104,10 @@ export default {
           from: { "--num": "0" },
           to: { "--num": "var(--target)" },
         },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,6 +118,7 @@ export default {
         "slide-in-right": "slide-in-right 0.4s ease-out forwards",
         "slide-in-left": "slide-in-left 0.4s ease-out forwards",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "bounce-slow": "bounce-slow 2s ease-in-out infinite",
       },
     },
   },

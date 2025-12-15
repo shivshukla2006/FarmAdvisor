@@ -16,10 +16,12 @@ interface Message {
 export const ChatbotButton = () => {
   const { isOpen, closeChatbot, toggleChatbot } = useChatbot();
   const { user } = useAuth();
+  const CHATBOT_NAME = "Kisan Mitra";
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! 👋 I'm your AI farming assistant. Ask me anything about crops, weather, pests, or government schemes!"
+      content: `Namaste! 🙏 I'm ${CHATBOT_NAME}, your friendly farming assistant. Ask me anything about crops, weather, pests, or government schemes!`
     }
   ]);
   const [input, setInput] = useState("");
@@ -141,19 +143,37 @@ export const ChatbotButton = () => {
   return (
     <>
       {isOpen && (
-        <Card className="fixed bottom-24 right-4 w-80 md:w-96 h-[500px] z-50 p-4 bg-card border-border shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-heading font-semibold">AI Farm Assistant</h3>
+        <Card className="fixed bottom-24 right-4 w-80 md:w-96 h-[550px] z-50 p-4 bg-card border-border shadow-lg animate-scale-in">
+          {/* Header with close button */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground">AI Assistant</span>
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8"
               onClick={closeChatbot}
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
           
-          <div className="h-[calc(100%-100px)] bg-muted/30 rounded-lg p-4 mb-4 overflow-y-auto">
+          {/* Mascot Header */}
+          <div className="flex flex-col items-center mb-4 pb-3 border-b border-border">
+            <div className="relative">
+              {/* Cartoon Farmer Mascot */}
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center text-4xl animate-bounce-slow">
+                👨‍🌾
+              </div>
+              {/* Speech bubble */}
+              <div className="absolute -right-2 -top-1 bg-primary text-primary-foreground text-[10px] px-2 py-1 rounded-full font-medium animate-pulse">
+                Hi!
+              </div>
+            </div>
+            <h3 className="font-heading font-bold text-lg text-primary mt-2">{CHATBOT_NAME}</h3>
+            <p className="text-xs text-muted-foreground">Ask me anything about farming!</p>
+          </div>
+          
+          <div className="h-[calc(100%-180px)] bg-muted/30 rounded-lg p-3 mb-3 overflow-y-auto">
             <div className="space-y-3">
               {messages.map((message, index) => (
                 <div
