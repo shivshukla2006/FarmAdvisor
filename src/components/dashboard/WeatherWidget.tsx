@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { CloudRain, Wind, Droplets, Sun, Cloud, CloudSnow, Loader2 } from "lucide-react";
+import { CloudRain, Wind, Droplets, Sun, Cloud, CloudSnow, Loader2, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentWeather, WeatherData } from "@/services/weatherService";
 import { toast } from "sonner";
@@ -53,11 +53,23 @@ export const WeatherWidget = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const isNightTime = () => {
+    const hour = new Date().getHours();
+    return hour < 6 || hour >= 18; // Night is between 6 PM and 6 AM
+  };
+
   const getWeatherIcon = (description: string) => {
     const desc = description.toLowerCase();
+    const isNight = isNightTime();
+    
     if (desc.includes("rain")) return <CloudRain className="h-8 w-8 text-primary mb-2" />;
     if (desc.includes("cloud")) return <Cloud className="h-8 w-8 text-muted-foreground mb-2" />;
     if (desc.includes("snow")) return <CloudSnow className="h-8 w-8 text-primary mb-2" />;
+    
+    // Show moon at night, sun during day for clear weather
+    if (isNight) {
+      return <Moon className="h-8 w-8 text-indigo-400 mb-2" />;
+    }
     return <Sun className="h-8 w-8 text-accent mb-2" />;
   };
 
