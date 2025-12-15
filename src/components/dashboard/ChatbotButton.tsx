@@ -143,7 +143,7 @@ export const ChatbotButton = () => {
   return (
     <>
       {isOpen && (
-        <Card className="fixed bottom-24 right-4 w-80 md:w-96 h-[550px] z-50 p-4 bg-card border-border shadow-lg animate-scale-in">
+        <Card className="fixed top-20 right-4 w-80 md:w-96 h-[550px] z-50 p-4 bg-card border-border shadow-lg animate-scale-in">
           {/* Header with close button */}
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-muted-foreground">AI Assistant</span>
@@ -220,7 +220,7 @@ export const ChatbotButton = () => {
       
       <Button
         size="lg"
-        className="fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full shadow-lg"
+        className="fixed top-20 right-4 z-50 h-14 w-14 rounded-full shadow-lg"
         onClick={toggleChatbot}
       >
         {isOpen ? (
