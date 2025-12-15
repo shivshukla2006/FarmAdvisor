@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useChatbot } from "@/contexts/ChatbotContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -14,6 +15,7 @@ interface Message {
 
 export const ChatbotButton = () => {
   const { isOpen, closeChatbot, toggleChatbot } = useChatbot();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -36,6 +38,18 @@ export const ChatbotButton = () => {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Get the current session for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to use the chatbot.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const userMessage = input.trim();
     setInput("");
     
@@ -51,7 +65,7 @@ export const ChatbotButton = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          "Authorization": `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ messages: newMessages }),
       });
