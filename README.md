@@ -151,7 +151,7 @@ npm run lint         # Run ESLint
 ## 🌐 Deployment
 
 ### Deploy via Lovable (Recommended)
-1. Open your [Lovable Project](https://lovable.dev/projects/caf03530-ce64-42fa-9dfd-80c249d1dfa3)
+1. Open your [Live Project](https://farm-advisor-ten.vercel.app/)
 2. Click **Share** → **Publish**
 3. Click **Update** to deploy frontend changes
 
@@ -218,4 +218,4 @@ The app includes comprehensive error handling:
 - Network request monitoring
 - Real-time database query logging
 
-**Built with ❤️ using Lovable - Empowering farmers with AI-driven agricultural insights**
+**Built with ❤️  - Empowering farmers with AI-driven agricultural insights**
