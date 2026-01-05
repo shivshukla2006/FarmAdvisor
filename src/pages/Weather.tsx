@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherData, type ForecastData } from "@/services/weatherService";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { AnimatedWeatherIcon } from "@/components/dashboard/AnimatedWeatherIcon";
 
 interface LocationSuggestion {
   name: string;
@@ -41,12 +42,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const getWeatherIcon = (description: string) => {
-  const desc = description.toLowerCase();
-  if (desc.includes("rain")) return CloudRain;
-  if (desc.includes("cloud")) return Cloud;
-  if (desc.includes("snow")) return CloudSnow;
-  return Sun;
+// Helper to determine if it's night based on API sunrise/sunset
+const isNightTime = (weather: WeatherData | null): boolean => {
+  if (!weather?.sunrise || !weather?.sunset) {
+    const hour = new Date().getHours();
+    return hour < 6 || hour >= 18;
+  }
+  const now = Math.floor(Date.now() / 1000);
+  return now < weather.sunrise || now > weather.sunset;
 };
 
 const Weather = () => {
@@ -501,10 +504,11 @@ const Weather = () => {
           ) : currentWeather ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex items-center gap-6">
-                {(() => {
-                  const WeatherIcon = getWeatherIcon(currentWeather.description);
-                  return <WeatherIcon className="h-24 w-24 text-accent" />;
-                })()}
+                <AnimatedWeatherIcon 
+                  description={currentWeather.description} 
+                  isNight={isNightTime(currentWeather)}
+                  size="lg"
+                />
                 <div>
                   <div className="text-6xl font-bold mb-2">{Math.round(currentWeather.temperature)}°C</div>
                   <div className="text-lg text-muted-foreground capitalize">{currentWeather.description}</div>
@@ -551,7 +555,6 @@ const Weather = () => {
           ) : forecast.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
               {forecast.map((day, index) => {
-                const WeatherIcon = getWeatherIcon(day.description);
                 const date = new Date(day.date);
                 const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
                 
@@ -561,8 +564,12 @@ const Weather = () => {
                     className="flex flex-col items-center p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                   >
                     <div className="font-medium mb-2">{dayName}</div>
-                    <WeatherIcon className="h-10 w-10 text-primary mb-2" />
-                    <div className="text-sm text-muted-foreground mb-1 capitalize">{day.description}</div>
+                    <AnimatedWeatherIcon 
+                      description={day.description} 
+                      isNight={false}
+                      size="sm"
+                    />
+                    <div className="text-sm text-muted-foreground mb-1 mt-2 capitalize">{day.description}</div>
                     <div className="flex gap-2 text-sm">
                       <span className="font-semibold">{Math.round(day.temperature.max)}°</span>
                       <span className="text-muted-foreground">{Math.round(day.temperature.min)}°</span>
