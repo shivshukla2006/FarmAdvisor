@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Wind, Droplets, CloudRain, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentWeather, WeatherData } from "@/services/weatherService";
@@ -7,6 +6,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
+import { WeatherBackground } from "./WeatherBackground";
+import { Card } from "@/components/ui/card";
 
 export const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -90,16 +91,16 @@ export const WeatherWidget = () => {
   }
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <WeatherBackground weather={weather} className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-heading font-semibold">{t("weatherOverview")}</h2>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm opacity-80">
           {weather.cityName}, {weather.country}
         </span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
+        <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
           <div className="mb-2">
             <AnimatedWeatherIcon 
               description={weather.description} 
@@ -107,36 +108,36 @@ export const WeatherWidget = () => {
             />
           </div>
           <div className="text-2xl font-bold">{Math.round(weather.temperature)}°C</div>
-          <div className="text-sm text-muted-foreground">{t("temperature")}</div>
+          <div className="text-sm opacity-80">{t("temperature")}</div>
         </div>
 
-        <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-          <Droplets className="h-8 w-8 text-primary mb-2" />
+        <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+          <Droplets className="h-8 w-8 mb-2" />
           <div className="text-2xl font-bold">{weather.humidity}%</div>
-          <div className="text-sm text-muted-foreground">{t("humidity")}</div>
+          <div className="text-sm opacity-80">{t("humidity")}</div>
         </div>
 
-        <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-          <Wind className="h-8 w-8 text-secondary mb-2" />
+        <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+          <Wind className="h-8 w-8 mb-2" />
           <div className="text-2xl font-bold">{Math.round(weather.windSpeed)} km/h</div>
-          <div className="text-sm text-muted-foreground">{t("windSpeed")}</div>
+          <div className="text-sm opacity-80">{t("windSpeed")}</div>
         </div>
 
-        <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-          <CloudRain className="h-8 w-8 text-primary mb-2" />
+        <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+          <CloudRain className="h-8 w-8 mb-2" />
           <div className="text-2xl font-bold">{weather.precipitation || 0}%</div>
-          <div className="text-sm text-muted-foreground">{t("rainChance")}</div>
+          <div className="text-sm opacity-80">{t("rainChance")}</div>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t flex items-center justify-between">
-        <div className="text-sm text-muted-foreground capitalize">
+      <div className="mt-4 pt-4 border-t border-white/20 flex items-center justify-between">
+        <div className="text-sm opacity-80 capitalize">
           {weather.description}
         </div>
-        <Button asChild variant="link" size="sm">
+        <Button asChild variant="ghost" size="sm" className="hover:bg-white/20">
           <Link to="/weather">{t("viewFullForecast")}</Link>
         </Button>
       </div>
-    </Card>
+    </WeatherBackground>
   );
 };

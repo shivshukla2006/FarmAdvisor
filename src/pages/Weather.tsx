@@ -11,6 +11,7 @@ import { getCurrentWeather, getWeatherForecast, getWeatherAlerts, type WeatherDa
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AnimatedWeatherIcon } from "@/components/dashboard/AnimatedWeatherIcon";
+import { WeatherBackground } from "@/components/dashboard/WeatherBackground";
 
 interface LocationSuggestion {
   name: string;
@@ -491,17 +492,19 @@ const Weather = () => {
         </Card>
 
         {/* Current Weather */}
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <MapPin className="h-5 w-5 text-muted-foreground" />
-            <span className="text-lg font-medium">{location || t("fetchingLocation")}</span>
-          </div>
-
-          {isLoading ? (
+        {isLoading ? (
+          <Card className="p-6">
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : currentWeather ? (
+          </Card>
+        ) : currentWeather ? (
+          <WeatherBackground weather={currentWeather} className="p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <MapPin className="h-5 w-5 opacity-80" />
+              <span className="text-lg font-medium">{location || t("fetchingLocation")}</span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex items-center gap-6">
                 <AnimatedWeatherIcon 
@@ -511,39 +514,41 @@ const Weather = () => {
                 />
                 <div>
                   <div className="text-6xl font-bold mb-2">{Math.round(currentWeather.temperature)}°C</div>
-                  <div className="text-lg text-muted-foreground capitalize">{currentWeather.description}</div>
+                  <div className="text-lg opacity-80 capitalize">{currentWeather.description}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                  <Droplets className="h-8 w-8 text-primary mb-2" />
+                <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+                  <Droplets className="h-8 w-8 mb-2" />
                   <div className="text-2xl font-bold">{currentWeather.humidity}%</div>
-                  <div className="text-sm text-muted-foreground">{t("humidity")}</div>
+                  <div className="text-sm opacity-80">{t("humidity")}</div>
                 </div>
-                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                  <Wind className="h-8 w-8 text-secondary mb-2" />
+                <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+                  <Wind className="h-8 w-8 mb-2" />
                   <div className="text-2xl font-bold">{Math.round(currentWeather.windSpeed)} km/h</div>
-                  <div className="text-sm text-muted-foreground">{t("windSpeed")}</div>
+                  <div className="text-sm opacity-80">{t("windSpeed")}</div>
                 </div>
-                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                  <CloudRain className="h-8 w-8 text-primary mb-2" />
+                <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+                  <CloudRain className="h-8 w-8 mb-2" />
                   <div className="text-2xl font-bold">{currentWeather.precipitation}%</div>
-                  <div className="text-sm text-muted-foreground">{t("precipitation")}</div>
+                  <div className="text-sm opacity-80">{t("precipitation")}</div>
                 </div>
-                <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                  <Eye className="h-8 w-8 text-muted-foreground mb-2" />
+                <div className="flex flex-col items-center p-4 rounded-lg bg-white/10 backdrop-blur-sm">
+                  <Eye className="h-8 w-8 opacity-80 mb-2" />
                   <div className="text-2xl font-bold">{(currentWeather.windSpeed / 10).toFixed(1)} km</div>
-                  <div className="text-sm text-muted-foreground">{t("visibility")}</div>
+                  <div className="text-sm opacity-80">{t("visibility")}</div>
                 </div>
               </div>
             </div>
-          ) : (
+          </WeatherBackground>
+        ) : (
+          <Card className="p-6">
             <div className="text-center py-8 text-muted-foreground">
               {t("failedToLoadWeather")}
             </div>
-          )}
-        </Card>
+          </Card>
+        )}
 
         {/* 7-Day Forecast */}
         <Card className="p-6">
