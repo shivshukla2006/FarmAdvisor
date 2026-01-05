@@ -1,11 +1,12 @@
 import { Card } from "@/components/ui/card";
-import { CloudRain, Wind, Droplets, Sun, Cloud, CloudSnow, Loader2, Moon } from "lucide-react";
+import { Wind, Droplets, CloudRain, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentWeather, WeatherData } from "@/services/weatherService";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
 
 export const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -53,24 +54,16 @@ export const WeatherWidget = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const isNightTime = () => {
-    const hour = new Date().getHours();
-    return hour < 6 || hour >= 18; // Night is between 6 PM and 6 AM
-  };
-
-  const getWeatherIcon = (description: string) => {
-    const desc = description.toLowerCase();
-    const isNight = isNightTime();
-    
-    if (desc.includes("rain")) return <CloudRain className="h-8 w-8 text-primary mb-2" />;
-    if (desc.includes("cloud")) return <Cloud className="h-8 w-8 text-muted-foreground mb-2" />;
-    if (desc.includes("snow")) return <CloudSnow className="h-8 w-8 text-primary mb-2" />;
-    
-    // Show moon at night, sun during day for clear weather
-    if (isNight) {
-      return <Moon className="h-8 w-8 text-indigo-400 mb-2" />;
+  // Use API sunrise/sunset times to determine if it's night
+  const isNightTime = (weatherData: WeatherData | null): boolean => {
+    if (!weatherData?.sunrise || !weatherData?.sunset) {
+      // Fallback to local time if no sunrise/sunset data
+      const hour = new Date().getHours();
+      return hour < 6 || hour >= 18;
     }
-    return <Sun className="h-8 w-8 text-accent mb-2" />;
+    
+    const now = Math.floor(Date.now() / 1000); // Current time in Unix timestamp
+    return now < weatherData.sunrise || now > weatherData.sunset;
   };
 
   if (loading) {
@@ -107,7 +100,12 @@ export const WeatherWidget = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-          {getWeatherIcon(weather.description)}
+          <div className="mb-2">
+            <AnimatedWeatherIcon 
+              description={weather.description} 
+              isNight={isNightTime(weather)} 
+            />
+          </div>
           <div className="text-2xl font-bold">{Math.round(weather.temperature)}°C</div>
           <div className="text-sm text-muted-foreground">{t("temperature")}</div>
         </div>

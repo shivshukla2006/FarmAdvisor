@@ -9,6 +9,8 @@ export interface WeatherData {
   icon: string;
   cityName: string;
   country: string;
+  sunrise: number; // Unix timestamp
+  sunset: number; // Unix timestamp
 }
 
 export interface ForecastData {
@@ -44,6 +46,8 @@ export const getCurrentWeather = async (
     icon: data.weather[0].icon,
     cityName: data.name,
     country: data.sys.country,
+    sunrise: data.sys.sunrise,
+    sunset: data.sys.sunset,
   };
 };
 
