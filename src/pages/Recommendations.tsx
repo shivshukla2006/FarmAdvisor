@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Leaf, MapPin, Calendar, Bookmark, Share2, Loader2 } from "lucide-react";
+import { Leaf, MapPin, Calendar, Bookmark, Share2, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCropRecommendations, type CropRecommendation } from "@/services/cropRecommendationService";
+import { generateRecommendationsPDF } from "@/utils/pdfGenerator";
 
 const soilTypes = ["Loamy", "Clay", "Sandy", "Silt", "Red Soil", "Black Soil", "Alluvial"];
 const seasons = ["Kharif (Monsoon)", "Rabi (Winter)", "Zaid (Summer)"];
@@ -170,7 +171,7 @@ const Recommendations = () => {
 
         {showResults && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
               <h2 className="text-2xl font-heading font-bold">Your Recommendations</h2>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleSave}>
@@ -180,6 +181,14 @@ const Recommendations = () => {
                 <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="mr-2 h-4 w-4" />
                   Share
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => generateRecommendationsPDF(recommendations, formData)}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
                 </Button>
               </div>
             </div>
