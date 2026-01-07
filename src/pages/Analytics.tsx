@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Activity, Droplets, Sprout, DollarSign, Calendar } from "lucide-react";
+import { TrendingUp, Activity, Droplets, Sprout, Calendar, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { generateAnalyticsPDF } from "@/utils/pdfGenerator";
 
 const Analytics = () => {
   const { user } = useAuth();
@@ -125,17 +127,26 @@ const Analytics = () => {
               Track your farming activities, insights, and performance metrics
             </p>
           </div>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => generateAnalyticsPDF(stats, activities, recommendations, diagnoses)}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
