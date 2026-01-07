@@ -5,37 +5,63 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { CommunityHighlights } from "@/components/dashboard/CommunityHighlights";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="opacity-0 animate-fade-in">
+      <motion.div 
+        className="space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <WelcomeSection />
-        </div>
+        </motion.div>
         
         <StatsOverview />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="opacity-0 animate-fade-in-up animation-delay-200">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <WeatherWidget />
-            </div>
-            <div className="opacity-0 animate-fade-in-up animation-delay-300">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <QuickActions />
-            </div>
+            </motion.div>
           </div>
           
           <div className="space-y-6">
-            <div className="opacity-0 animate-slide-in-right animation-delay-300">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <RecentActivity />
-            </div>
-            <div className="opacity-0 animate-slide-in-right animation-delay-400">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               <CommunityHighlights />
-            </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </DashboardLayout>
   );
 };
