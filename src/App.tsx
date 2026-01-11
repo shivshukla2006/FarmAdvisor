@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Loader2 } from "lucide-react";
+import { WheatLoader } from "@/components/ui/WheatLoader";
+import { ThemeProvider } from "next-themes";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -22,23 +23,25 @@ const Community = lazy(() => import("./pages/Community"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Loading fallback component
+// Loading fallback component with wheat grain animation
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
+    <WheatLoader size="lg" />
+    <p className="text-muted-foreground text-sm animate-pulse-soft font-medium">Loading...</p>
   </div>
 );
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <LanguageProvider>
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <LanguageProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
               <Route path="/" element={<Index />} />
@@ -116,6 +119,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
