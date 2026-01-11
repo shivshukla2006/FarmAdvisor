@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,10 @@ const cropOptions = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Pulses", 
 
 const Recommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocationLoading, setIsLocationLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [recommendations, setRecommendations] = useState<CropRecommendation[]>([]);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [formData, setFormData] = useState({
     soilType: "",
     season: "",
@@ -26,6 +28,60 @@ const Recommendations = () => {
     selectedCrops: [] as string[],
   });
   const { toast } = useToast();
+
+  // Fetch user's real-time location on mount
+  useEffect(() => {
+    getUserLocation();
+  }, []);
+
+  const getUserLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Please enter your location manually",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLocationLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCoordinates({ lat: latitude, lng: longitude });
+
+        try {
+          // Reverse geocode to get location name
+          const response = await fetch(
+            `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=b1b15e88fa797225412429c1c50c122a`
+          );
+          const data = await response.json();
+
+          if (data && data.length > 0) {
+            const locationName = data[0].state 
+              ? `${data[0].name}, ${data[0].state}, ${data[0].country}`
+              : `${data[0].name}, ${data[0].country}`;
+            setFormData(prev => ({ ...prev, location: locationName }));
+          }
+        } catch (error) {
+          console.error("Error reverse geocoding:", error);
+        } finally {
+          setIsLocationLoading(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setIsLocationLoading(false);
+        toast({
+          title: "Location access denied",
+          description: "Please enable location access or enter manually",
+          variant: "destructive",
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const handleCropToggle = (crop: string) => {
     setFormData(prev => ({
@@ -46,6 +102,8 @@ const Recommendations = () => {
         season: formData.season,
         location: formData.location,
         preferences: formData.selectedCrops,
+        latitude: coordinates?.lat,
+        longitude: coordinates?.lng,
       });
       
       setRecommendations(results);
@@ -131,8 +189,18 @@ const Recommendations = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                   className="flex-1"
                 />
-                <Button type="button" variant="outline" size="icon">
-                  <MapPin className="h-4 w-4" />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="icon"
+                  onClick={getUserLocation}
+                  disabled={isLocationLoading}
+                >
+                  {isLocationLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
