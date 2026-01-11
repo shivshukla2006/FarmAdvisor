@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { WheatLoader } from "@/components/ui/WheatLoader";
+import { LeafLoader } from "@/components/ui/LeafLoader";
 import { ThemeProvider } from "next-themes";
 
 // Lazy load pages for better performance
@@ -23,11 +23,11 @@ const Community = lazy(() => import("./pages/Community"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Loading fallback component with wheat grain animation
+// Loading fallback component with leaf animation
 const PageLoader = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-    <WheatLoader size="lg" />
-    <p className="text-muted-foreground text-sm animate-pulse-soft font-medium">Loading...</p>
+  <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-3">
+    <LeafLoader size="sm" />
+    <p className="text-muted-foreground text-xs animate-pulse-soft">Loading...</p>
   </div>
 );
 
