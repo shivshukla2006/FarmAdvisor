@@ -1,4 +1,4 @@
-import { Bell, Menu, User } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -58,7 +59,7 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
           <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger className="w-[100px] md:w-[120px] bg-background/50 border-border/50 hover:bg-background/80 transition-colors duration-200">
               <SelectValue />
@@ -70,6 +71,8 @@ export const DashboardHeader = ({ onMenuClick }: DashboardHeaderProps) => {
               <SelectItem value="ta">தமிழ்</SelectItem>
             </SelectContent>
           </Select>
+
+          <ThemeToggle />
 
           <NotificationCenter />
 

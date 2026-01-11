@@ -4,6 +4,7 @@ import { Sprout } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Language } from "@/lib/translations";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -16,7 +17,7 @@ export const Header = () => {
           <span className="font-heading font-bold text-xl text-white">FarmAdvisor</span>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
             <SelectTrigger className="w-[120px] bg-white/10 border-white/20 text-white">
               <SelectValue placeholder="Language" />
@@ -28,6 +29,8 @@ export const Header = () => {
               <SelectItem value="ta">தமிழ்</SelectItem>
             </SelectContent>
           </Select>
+          
+          <ThemeToggle />
           
           <Button variant="ghost" className="hidden sm:inline-flex text-white hover:bg-white/10" asChild>
             <Link to="/auth">{t("login")}</Link>
