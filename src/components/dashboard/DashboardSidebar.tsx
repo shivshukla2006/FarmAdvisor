@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useChatbot } from "@/contexts/ChatbotContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   LayoutDashboard,
   Leaf,
@@ -12,6 +13,7 @@ import {
   Users,
   BarChart3,
   X,
+  Shield,
 } from "lucide-react";
 
 interface DashboardSidebarProps {
@@ -23,6 +25,7 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
   const location = useLocation();
   const { openChatbot } = useChatbot();
   const { t } = useLanguage();
+  const { isAdmin } = useUserRole();
 
   const menuItems = [
     { icon: LayoutDashboard, label: t("dashboard"), path: "/dashboard" },
@@ -32,6 +35,7 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
     { icon: Newspaper, label: t("schemes"), path: "/schemes" },
     { icon: Users, label: t("community"), path: "/community" },
     { icon: BarChart3, label: t("analytics"), path: "/analytics" },
+    ...(isAdmin ? [{ icon: Shield, label: "Admin Panel", path: "/admin" }] : []),
   ];
 
   return (
