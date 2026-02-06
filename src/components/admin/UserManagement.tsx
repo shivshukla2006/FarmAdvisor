@@ -31,10 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, MoreHorizontal, Shield, ShieldCheck, User, UserX } from "lucide-react";
+import { Search, MoreHorizontal, Shield, ShieldCheck, User, UserX, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Database } from "@/integrations/supabase/types";
+import { UserDetailModal } from "./UserDetailModal";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -54,7 +55,8 @@ interface UserRole {
 
 export const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [roleAction, setRoleAction] = useState<{ userId: string; role: AppRole; action: "add" | "remove" } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -228,51 +230,74 @@ export const UserManagement = () => {
                         {format(new Date(user.created_at), "MMM d, yyyy")}
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Manage Roles</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {!roles.includes("admin") && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedUserId(user.id);
+                              setDetailModalOpen(true);
+                            }}
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => setRoleAction({ userId: user.id, role: "admin", action: "add" })}
+                                onClick={() => {
+                                  setSelectedUserId(user.id);
+                                  setDetailModalOpen(true);
+                                }}
                               >
-                                <ShieldCheck className="h-4 w-4 mr-2" />
-                                Make Admin
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
                               </DropdownMenuItem>
-                            )}
-                            {roles.includes("admin") && (
-                              <DropdownMenuItem
-                                onClick={() => setRoleAction({ userId: user.id, role: "admin", action: "remove" })}
-                                className="text-destructive"
-                              >
-                                <UserX className="h-4 w-4 mr-2" />
-                                Remove Admin
-                              </DropdownMenuItem>
-                            )}
-                            {!roles.includes("moderator") && (
-                              <DropdownMenuItem
-                                onClick={() => setRoleAction({ userId: user.id, role: "moderator", action: "add" })}
-                              >
-                                <Shield className="h-4 w-4 mr-2" />
-                                Make Moderator
-                              </DropdownMenuItem>
-                            )}
-                            {roles.includes("moderator") && (
-                              <DropdownMenuItem
-                                onClick={() => setRoleAction({ userId: user.id, role: "moderator", action: "remove" })}
-                                className="text-destructive"
-                              >
-                                <UserX className="h-4 w-4 mr-2" />
-                                Remove Moderator
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel>Manage Roles</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              {!roles.includes("admin") && (
+                                <DropdownMenuItem
+                                  onClick={() => setRoleAction({ userId: user.id, role: "admin", action: "add" })}
+                                >
+                                  <ShieldCheck className="h-4 w-4 mr-2" />
+                                  Make Admin
+                                </DropdownMenuItem>
+                              )}
+                              {roles.includes("admin") && (
+                                <DropdownMenuItem
+                                  onClick={() => setRoleAction({ userId: user.id, role: "admin", action: "remove" })}
+                                  className="text-destructive"
+                                >
+                                  <UserX className="h-4 w-4 mr-2" />
+                                  Remove Admin
+                                </DropdownMenuItem>
+                              )}
+                              {!roles.includes("moderator") && (
+                                <DropdownMenuItem
+                                  onClick={() => setRoleAction({ userId: user.id, role: "moderator", action: "add" })}
+                                >
+                                  <Shield className="h-4 w-4 mr-2" />
+                                  Make Moderator
+                                </DropdownMenuItem>
+                              )}
+                              {roles.includes("moderator") && (
+                                <DropdownMenuItem
+                                  onClick={() => setRoleAction({ userId: user.id, role: "moderator", action: "remove" })}
+                                  className="text-destructive"
+                                >
+                                  <UserX className="h-4 w-4 mr-2" />
+                                  Remove Moderator
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -302,6 +327,12 @@ export const UserManagement = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UserDetailModal
+        userId={selectedUserId}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+      />
     </Card>
   );
 };
