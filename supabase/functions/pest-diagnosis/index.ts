@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 // Input validation
@@ -12,10 +12,8 @@ const validateImageUrl = (url: string): boolean => {
   
   try {
     const parsedUrl = new URL(url);
-    // Only allow HTTPS and specific domains (Supabase storage)
     if (parsedUrl.protocol !== 'https:') return false;
     
-    // Allow Supabase storage URLs
     const allowedDomains = [
       'supabase.co',
       'btspzagknvsbzyhwfvkh.supabase.co'
@@ -32,7 +30,7 @@ const validateImageUrl = (url: string): boolean => {
 };
 
 const validateCropType = (cropType?: string): boolean => {
-  if (!cropType) return true; // optional
+  if (!cropType) return true;
   return cropType.length > 0 && cropType.length <= 100;
 };
 
@@ -55,7 +53,6 @@ serve(async (req) => {
   try {
     const { imageUrl, cropType } = await req.json();
 
-    // Validate inputs
     if (!validateImageUrl(imageUrl)) {
       throw new Error('Invalid image URL: must be a valid HTTPS URL from allowed storage');
     }
@@ -63,13 +60,14 @@ serve(async (req) => {
     if (!validateCropType(cropType)) {
       throw new Error('Invalid crop type: must be 1-100 characters');
     }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Authentication is optional - if provided, we'll save to user's account
+    // Authentication is optional
     const authHeader = req.headers.get('Authorization');
     let user = null;
     
@@ -84,94 +82,27 @@ serve(async (req) => {
       if (!authErr && authUser) {
         user = authUser;
         console.log('User authenticated:', user.id);
-      } else {
-        console.log('Authentication failed, proceeding without user context');
       }
-    } else {
-      console.log('No authentication provided, proceeding as public request');
     }
 
-    // Step 1: Validate if the image is relevant to agriculture/pests
-    console.log('Step 1: Validating image content...');
-    const validationPrompt = `Analyze this image and determine if it shows:
-- Agricultural crops or plants
-- Plant diseases, pests, or damage
-- Insects or organisms affecting plants
-- Any agricultural/farming related content
+    // Single combined prompt for validation + diagnosis (faster than 2 calls)
+    console.log('Performing pest diagnosis...');
+    const combinedPrompt = `You are an expert plant pathologist and agricultural pest specialist. 
 
-Respond with JSON:
+FIRST: Determine if this image shows agricultural content (crops, plants, pests, diseases, plant damage, insects affecting plants).
+
+If the image does NOT show agricultural content (random objects, people, non-pest animals, buildings, vehicles, food/cooked dishes, indoor scenes), respond with:
 {
-  "isValid": boolean,
-  "reason": "brief explanation"
+  "isValid": false,
+  "reason": "brief explanation why this is not agricultural content"
 }
 
-Return isValid: false if the image shows:
-- Random objects, people, animals (not pests)
-- Indoor scenes, buildings, vehicles
-- Food items, cooked dishes
-- Any non-agricultural content`;
-
-    const validationResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: validationPrompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl
-                }
-              }
-            ]
-          }
-        ],
-        response_format: { type: 'json_object' }
-      }),
-    });
-
-    if (!validationResponse.ok) {
-      throw new Error('Image validation failed');
-    }
-
-    const validationResult = await validationResponse.json();
-    const cleanedValidation = cleanJsonResponse(validationResult.choices[0].message.content);
-    const validation = JSON.parse(cleanedValidation);
-    
-    console.log('Validation result:', validation);
-
-    if (!validation.isValid) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid photo',
-          message: 'The uploaded image does not appear to show crops, plants, pests, or agricultural content. Please upload a clear photo of affected plants or crop damage.',
-          reason: validation.reason
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Step 2: Proceed with pest diagnosis
-    console.log('Step 2: Performing pest diagnosis...');
-    const prompt = `You are an expert plant pathologist and agricultural pest specialist. Analyze this image of a crop plant and identify any pests, diseases, or issues.
-
-${cropType ? `Crop Type: ${cropType}` : ''}
-
-Please provide a detailed analysis in JSON format:
+If the image DOES show agricultural content, analyze it and respond with:
 {
+  "isValid": true,
   "pestIdentified": "name of pest/disease or 'None detected'",
   "confidence": number (0-100),
-  "severity": "low/medium/high/critical",
+  "severity": "low" | "medium" | "high" | "critical",
   "description": "detailed description of the issue",
   "symptoms": ["symptom1", "symptom2"],
   "causes": "explanation of causes",
@@ -185,8 +116,10 @@ Please provide a detailed analysis in JSON format:
   ],
   "preventiveMeasures": ["measure1", "measure2"],
   "affectedParts": ["plant part1", "plant part2"],
-  "spreadRisk": "low/medium/high"
-}`;
+  "spreadRisk": "low" | "medium" | "high"
+}
+
+${cropType ? `Crop Type: ${cropType}` : ''}`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -195,21 +128,13 @@ Please provide a detailed analysis in JSON format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-3-flash-preview',
         messages: [
           {
             role: 'user',
             content: [
-              {
-                type: 'text',
-                text: prompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl
-                }
-              }
+              { type: 'text', text: combinedPrompt },
+              { type: 'image_url', image_url: { url: imageUrl } }
             ]
           }
         ],
@@ -234,8 +159,23 @@ Please provide a detailed analysis in JSON format:
     }
 
     const aiResponse = await response.json();
-    const cleanedDiagnosis = cleanJsonResponse(aiResponse.choices[0].message.content);
-    const diagnosis = JSON.parse(cleanedDiagnosis);
+    const cleanedResponse = cleanJsonResponse(aiResponse.choices[0].message.content);
+    const result = JSON.parse(cleanedResponse);
+
+    // Check if image was invalid
+    if (result.isValid === false) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid photo',
+          message: 'The uploaded image does not appear to show crops, plants, pests, or agricultural content. Please upload a clear photo of affected plants or crop damage.',
+          reason: result.reason
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Remove isValid from the diagnosis result
+    const { isValid, ...diagnosis } = result;
 
     // Save to database only if user is authenticated
     if (user) {
@@ -254,7 +194,7 @@ Please provide a detailed analysis in JSON format:
           pest_identified: diagnosis.pestIdentified,
           severity: diagnosis.severity,
           diagnosis_result: diagnosis,
-          treatment_recommendations: diagnosis.treatmentRecommendations.map((t: any) => t.method),
+          treatment_recommendations: diagnosis.treatmentRecommendations?.map((t: any) => t.method) || [],
           status: 'completed'
         })
         .select()
