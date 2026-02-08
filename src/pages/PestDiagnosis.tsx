@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle } from "lucide-react";
+import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { diagnosePest, uploadPestImage } from "@/services/pestDiagnosisService";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
 
 interface DiagnosisResult {
   pest: string;
@@ -19,36 +22,88 @@ interface DiagnosisResult {
   prevention: string[];
 }
 
-const mockHistory = [
-  {
-    id: 1,
-    date: "2024-10-25",
-    pest: "Aphids",
-    crop: "Cotton",
-    severity: "Medium",
-  },
-  {
-    id: 2,
-    date: "2024-10-20",
-    pest: "Leaf Miner",
-    crop: "Tomato",
-    severity: "Low",
-  },
-  {
-    id: 3,
-    date: "2024-10-15",
-    pest: "Bollworm",
-    crop: "Cotton",
-    severity: "High",
-  },
-];
+interface DiagnosisHistory {
+  id: string;
+  created_at: string;
+  pest_identified: string | null;
+  crop_type: string | null;
+  severity: string | null;
+}
 
 const PestDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [history, setHistory] = useState<DiagnosisHistory[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Fetch initial history and set up real-time subscription
+  useEffect(() => {
+    if (!user) {
+      setHistory([]);
+      setIsLoadingHistory(false);
+      return;
+    }
+
+    // Fetch initial history
+    const fetchHistory = async () => {
+      const { data, error } = await supabase
+        .from("pest_diagnoses")
+        .select("id, created_at, pest_identified, crop_type, severity")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error("Error fetching history:", error);
+      } else {
+        setHistory(data || []);
+      }
+      setIsLoadingHistory(false);
+    };
+
+    fetchHistory();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('pest-diagnoses-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'pest_diagnoses',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('New diagnosis received:', payload);
+          const newDiagnosis = payload.new as DiagnosisHistory;
+          setHistory((prev) => [newDiagnosis, ...prev].slice(0, 10));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'pest_diagnoses',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Diagnosis deleted:', payload);
+          const deletedId = payload.old.id;
+          setHistory((prev) => prev.filter((item) => item.id !== deletedId));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleCameraCapture = () => {
     const input = document.createElement('input');
@@ -146,16 +201,23 @@ const PestDiagnosis = () => {
   };
 
   const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "High":
+    const normalizedSeverity = severity?.toLowerCase();
+    switch (normalizedSeverity) {
+      case "high":
+      case "critical":
         return "bg-destructive/10 text-destructive border-destructive";
-      case "Medium":
+      case "medium":
         return "bg-accent/10 text-accent border-accent";
-      case "Low":
+      case "low":
         return "bg-primary/10 text-primary border-primary";
       default:
         return "bg-muted/10 text-muted-foreground border-muted";
     }
+  };
+
+  const formatSeverity = (severity: string | null) => {
+    if (!severity) return "Unknown";
+    return severity.charAt(0).toUpperCase() + severity.slice(1);
   };
 
   return (
@@ -318,24 +380,44 @@ const PestDiagnosis = () => {
             </Card>
 
             <Card className="p-6">
-              <h3 className="text-lg font-heading font-semibold mb-4">Diagnosis History</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <History className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-heading font-semibold">Diagnosis History</h3>
+              </div>
               <div className="space-y-3">
-                {mockHistory.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="font-medium">{item.pest}</span>
-                      <Badge variant="outline" className={`text-xs ${getSeverityColor(item.severity)}`}>
-                        {item.severity}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {item.crop} • {item.date}
-                    </div>
+                {isLoadingHistory ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
-                ))}
+                ) : !user ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    <Link to="/auth" className="text-primary hover:underline">
+                      Sign in
+                    </Link>{" "}
+                    to save your diagnosis history
+                  </p>
+                ) : history.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No diagnosis history yet. Upload an image to get started!
+                  </p>
+                ) : (
+                  history.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="font-medium">{item.pest_identified || "Unknown"}</span>
+                        <Badge variant="outline" className={`text-xs ${getSeverityColor(item.severity || "")}`}>
+                          {formatSeverity(item.severity)}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {item.crop_type || "Unknown crop"} • {format(new Date(item.created_at), "MMM d, yyyy")}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
           </div>
