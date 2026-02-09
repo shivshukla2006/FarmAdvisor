@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getCropRecommendations, type CropRecommendation } from "@/services/cropRecommendationService";
 import { generateRecommendationsPDF } from "@/utils/pdfGenerator";
 
-const soilTypes = ["Loamy", "Clay", "Sandy", "Silt", "Red Soil", "Black Soil", "Alluvial"];
+const soilTypes = ["Loamy (दोमट)", "Clay (चिकनी मिट्टी)", "Sandy (बलुई)", "Silt (गाद)", "Red Soil (लाल मिट्टी)", "Black Soil (काली मिट्टी)", "Alluvial (जलोढ़)"];
 const seasons = ["Kharif (Monsoon)", "Rabi (Winter)", "Zaid (Summer)"];
 const cropOptions = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Pulses", "Vegetables", "Fruits"];
 
