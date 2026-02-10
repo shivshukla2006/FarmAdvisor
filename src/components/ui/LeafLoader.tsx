@@ -7,23 +7,23 @@ interface LeafLoaderProps {
 
 export const LeafLoader = ({ size = "sm", className = "" }: LeafLoaderProps) => {
   const sizeClasses = {
-    sm: "w-6 h-8",
-    md: "w-8 h-10",
-    lg: "w-10 h-14",
+    sm: "w-6 h-10",
+    md: "w-8 h-12",
+    lg: "w-12 h-16",
   };
 
   return (
     <div className={`relative ${sizeClasses[size]} ${className}`}>
       <svg
-        viewBox="0 0 24 32"
+        viewBox="0 0 32 48"
         className="w-full h-full"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Leaf stem */}
+        {/* Wheat stem */}
         <motion.path
-          d="M12 32 L12 16"
-          stroke="hsl(var(--primary))"
+          d="M16 48 L16 12"
+          stroke="#8B6914"
           strokeWidth="1.5"
           strokeLinecap="round"
           initial={{ pathLength: 0, opacity: 0.3 }}
@@ -36,47 +36,70 @@ export const LeafLoader = ({ size = "sm", className = "" }: LeafLoaderProps) => 
           }}
         />
 
-        {/* Leaf shape */}
-        <motion.path
-          d="M12 2 C6 6 4 12 6 16 C8 20 12 20 12 16 C12 20 16 20 18 16 C20 12 18 6 12 2 Z"
-          fill="hsl(var(--primary))"
+        {/* Wheat grains - left side */}
+        <motion.ellipse cx="13" cy="10" rx="3" ry="5" fill="#DAA520"
           initial={{ opacity: 0.3, scale: 0.9 }}
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [0.9, 1.05, 0.9],
-          }}
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+        />
+        <motion.ellipse cx="12" cy="18" rx="3" ry="5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+        />
+        <motion.ellipse cx="13" cy="26" rx="3" ry="5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
         />
 
-        {/* Leaf vein */}
-        <motion.path
-          d="M12 4 L12 14"
-          stroke="hsl(var(--primary-foreground))"
-          strokeWidth="0.5"
-          strokeLinecap="round"
-          strokeOpacity="0.4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+        {/* Wheat grains - right side */}
+        <motion.ellipse cx="19" cy="10" rx="3" ry="5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+        />
+        <motion.ellipse cx="20" cy="18" rx="3" ry="5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+        />
+        <motion.ellipse cx="19" cy="26" rx="3" ry="5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", delay: 0.35 }}
+        />
+
+        {/* Top grain */}
+        <motion.ellipse cx="16" cy="4" rx="2.5" ry="4.5" fill="#DAA520"
+          initial={{ opacity: 0.3, scale: 0.9 }}
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Awns (whiskers) at top */}
+        <motion.path d="M16 0 L14 -2" stroke="#B8860B" strokeWidth="0.8" strokeLinecap="round"
+          initial={{ opacity: 0.3 }} animate={{ opacity: [0.3, 0.8, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        <motion.path d="M16 0 L18 -2" stroke="#B8860B" strokeWidth="0.8" strokeLinecap="round"
+          initial={{ opacity: 0.3 }} animate={{ opacity: [0.3, 0.8, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
+        />
+        <motion.path d="M16 0 L16 -3" stroke="#B8860B" strokeWidth="0.8" strokeLinecap="round"
+          initial={{ opacity: 0.3 }} animate={{ opacity: [0.3, 0.8, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
         />
 
         {/* Glow effect - bottom to top */}
         <defs>
-          <linearGradient id="leafGlow" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-            <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+          <linearGradient id="wheatGlow" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#DAA520" stopOpacity="0" />
+            <stop offset="50%" stopColor="#FFD700" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#DAA520" stopOpacity="0" />
           </linearGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -86,16 +109,16 @@ export const LeafLoader = ({ size = "sm", className = "" }: LeafLoaderProps) => 
 
         {/* Animated glow sweep */}
         <motion.rect
-          x="4"
+          x="8"
           y="0"
           width="16"
-          height="8"
-          fill="url(#leafGlow)"
+          height="10"
+          fill="url(#wheatGlow)"
           filter="url(#glow)"
-          initial={{ y: 28 }}
-          animate={{ y: -8 }}
+          initial={{ y: 44 }}
+          animate={{ y: -10 }}
           transition={{
-            duration: 1,
+            duration: 1.2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
