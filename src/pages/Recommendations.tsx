@@ -13,7 +13,7 @@ import { generateRecommendationsPDF } from "@/utils/pdfGenerator";
 
 const soilTypes = ["Loamy (दोमट)", "Clay (चिकनी मिट्टी)", "Sandy (बलुई)", "Silt (गाद)", "Red Soil (लाल मिट्टी)", "Black Soil (काली मिट्टी)", "Alluvial (जलोढ़)"];
 const seasons = ["Kharif (बरसात - Monsoon)", "Rabi (सर्दी - Winter)", "Zaid (गर्मी - Summer)"];
-const cropOptions = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Pulses", "Vegetables", "Fruits"];
+const cropOptions = ["Rice (चावल)", "Wheat (गेहूं)", "Cotton (कपास)", "Sugarcane (गन्ना)", "Maize (मक्का)", "Pulses (दालें)", "Vegetables (सब्ज़ियाँ)", "Fruits (फल)"];
 
 const Recommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
