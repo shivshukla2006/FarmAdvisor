@@ -21,6 +21,7 @@ const PestDiagnosis = lazy(() => import("./pages/PestDiagnosis"));
 const Schemes = lazy(() => import("./pages/Schemes"));
 const Community = lazy(() => import("./pages/Community"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const LeafDiagnosis = lazy(() => import("./pages/LeafDiagnosis"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -100,6 +101,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Community />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leaf-diagnosis"
+                element={
+                  <ProtectedRoute>
+                    <LeafDiagnosis />
                   </ProtectedRoute>
                 }
               />

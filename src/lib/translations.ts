@@ -29,6 +29,7 @@ export const translations = {
     schemes: "Schemes",
     community: "Community",
     analytics: "Analytics",
+    leafDiagnosis: "Leaf Diagnosis",
     getSupport: "Get Support",
     
     // Profile Menu
@@ -114,6 +115,7 @@ export const translations = {
     schemes: "योजनाएं",
     community: "समुदाय",
     analytics: "विश्लेषण",
+    leafDiagnosis: "पत्ती रोग निदान",
     getSupport: "सहायता प्राप्त करें",
     
     // Profile Menu
@@ -199,6 +201,7 @@ export const translations = {
     schemes: "योजना",
     community: "समुदाय",
     analytics: "विश्लेषण",
+    leafDiagnosis: "पान रोग निदान",
     getSupport: "समर्थन मिळवा",
     
     // Profile Menu
@@ -284,6 +287,7 @@ export const translations = {
     schemes: "திட்டங்கள்",
     community: "சமூகம்",
     analytics: "பகுப்பாய்வு",
+    leafDiagnosis: "இலை நோய் கண்டறிதல்",
     getSupport: "ஆதரவு பெறுக",
     
     // Profile Menu
