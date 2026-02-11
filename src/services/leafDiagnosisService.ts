@@ -18,6 +18,10 @@ export interface LeafDiagnosisResult {
   spreadRisk: string;
   organicRemedies: string[];
   chemicalTreatments: string[];
+  leafType: string;
+  plantName: string;
+  plantFamily: string;
+  plantCommonNames: string[];
 }
 
 export const diagnoseLeaf = async (input: LeafDiagnosisInput): Promise<LeafDiagnosisResult> => {

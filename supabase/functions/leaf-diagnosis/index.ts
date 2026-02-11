@@ -70,9 +70,13 @@ If the image does NOT show leaves or plant foliage (random objects, people, non-
   "reason": "brief explanation why this is not a leaf image"
 }
 
-If the image DOES show leaves/plant foliage, analyze it for diseases and respond with:
+If the image DOES show leaves/plant foliage, FIRST identify the plant and leaf type, then analyze for diseases. Respond with:
 {
   "isValid": true,
+  "leafType": "type of leaf (e.g., simple, compound, pinnate, palmate, needle-like, etc.)",
+  "plantName": "scientific/botanical name of the plant",
+  "plantFamily": "botanical family name (e.g., Solanaceae, Poaceae, Fabaceae)",
+  "plantCommonNames": ["common name 1", "common name 2 in regional language if applicable"],
   "diseaseName": "name of leaf disease or 'Healthy - No Disease Detected'",
   "confidence": number (0-100),
   "severity": "low" | "medium" | "high" | "critical",
