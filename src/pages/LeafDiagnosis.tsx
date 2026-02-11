@@ -175,6 +175,42 @@ const LeafDiagnosis = () => {
                   <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
 
+                {/* Plant Identification */}
+                {(result.plantName || result.leafType) && (
+                  <div className="mb-4 p-4 rounded-lg border bg-primary/5">
+                    <h3 className="font-heading font-semibold mb-2 flex items-center gap-2">
+                      <TreeDeciduous className="h-4 w-4 text-primary" />
+                      Plant Identification
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                      {result.plantName && (
+                        <div>
+                          <span className="text-muted-foreground">Botanical Name: </span>
+                          <span className="font-medium italic">{result.plantName}</span>
+                        </div>
+                      )}
+                      {result.plantFamily && (
+                        <div>
+                          <span className="text-muted-foreground">Family: </span>
+                          <span className="font-medium">{result.plantFamily}</span>
+                        </div>
+                      )}
+                      {result.leafType && (
+                        <div>
+                          <span className="text-muted-foreground">Leaf Type: </span>
+                          <span className="font-medium">{result.leafType}</span>
+                        </div>
+                      )}
+                      {result.plantCommonNames?.length > 0 && (
+                        <div>
+                          <span className="text-muted-foreground">Common Names: </span>
+                          <span className="font-medium">{result.plantCommonNames.join(', ')}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-muted-foreground mb-4">{result.description}</p>
 
                 {/* Symptoms */}
