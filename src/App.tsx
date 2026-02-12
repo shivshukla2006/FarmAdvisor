@@ -23,6 +23,7 @@ const Community = lazy(() => import("./pages/Community"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const LeafDiagnosis = lazy(() => import("./pages/LeafDiagnosis"));
 const Admin = lazy(() => import("./pages/Admin"));
+const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading fallback component with leaf animation
@@ -47,6 +48,7 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/install" element={<Install />} />
               <Route path="/auth" element={<Auth />} />
               <Route
                 path="/dashboard"
