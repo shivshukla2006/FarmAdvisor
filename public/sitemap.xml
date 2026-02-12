@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://farmadvisor.lovable.app/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/auth</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/install</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/dashboard</loc><priority>0.9</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/recommendations</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/weather</loc><priority>0.8</priority><changefreq>daily</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/pest-diagnosis</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/leaf-diagnosis</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/schemes</loc><priority>0.7</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://farmadvisor.lovable.app/community</loc><priority>0.7</priority><changefreq>daily</changefreq></url>
+</urlset>
