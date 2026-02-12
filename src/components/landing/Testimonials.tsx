@@ -28,7 +28,7 @@ export const Testimonials = () => {
     <section className="py-20 px-4 bg-black/60">
       <div className="container mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-white">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold mb-4 text-white">
             Trusted by Farmers
             <span className="text-primary"> Across India</span>
           </h2>

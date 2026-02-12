@@ -120,23 +120,24 @@ const Analytics = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-heading font-bold mb-2">Farm Analytics</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">Farm Analytics</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Track your farming activities, insights, and performance metrics
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Button 
               variant="outline" 
+              size="sm"
               onClick={() => generateAnalyticsPDF(stats, activities, recommendations, diagnoses)}
             >
               <Download className="mr-2 h-4 w-4" />
-              Download PDF
+              <span className="hidden sm:inline">Download</span> PDF
             </Button>
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-32 sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

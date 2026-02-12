@@ -224,8 +224,8 @@ const PestDiagnosis = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-heading font-bold mb-2">Pest Diagnosis</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">Pest Diagnosis</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Upload a photo of affected crops for AI-powered pest identification and treatment recommendations
           </p>
         </div>
@@ -237,7 +237,7 @@ const PestDiagnosis = () => {
               
               <div className="space-y-4">
                 {!previewUrl ? (
-                  <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary/50 transition-colors">
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-12 text-center hover:border-primary/50 transition-colors">
                     <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-sm text-muted-foreground mb-4">
                       Drag and drop an image, or click to browse

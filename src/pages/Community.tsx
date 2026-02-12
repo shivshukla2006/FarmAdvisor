@@ -256,10 +256,10 @@ const Community = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-heading font-bold mb-2">Community Forum</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">Community Forum</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Connect with fellow farmers, share knowledge, and get advice
             </p>
           </div>

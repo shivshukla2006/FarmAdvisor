@@ -4,7 +4,7 @@ export const Footer = () => {
   return (
     <footer className="py-12 px-4 bg-white/95 backdrop-blur-sm border-t">
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Sprout className="h-6 w-6 text-primary" />

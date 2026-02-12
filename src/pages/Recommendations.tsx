@@ -141,8 +141,8 @@ const Recommendations = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-heading font-bold mb-2">Crop Recommendations</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">Crop Recommendations</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Get AI-powered crop suggestions based on your soil, weather, and regional data
           </p>
         </div>
@@ -239,24 +239,24 @@ const Recommendations = () => {
 
         {showResults && (
           <div className="space-y-4">
-          <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-heading font-bold">Your Recommendations</h2>
-              <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-xl sm:text-2xl font-heading font-bold">Your Recommendations</h2>
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={handleSave}>
-                  <Bookmark className="mr-2 h-4 w-4" />
-                  Save
+                  <Bookmark className="mr-1 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Save</span>
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
+                  <Share2 className="mr-1 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Share</span>
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => generateRecommendationsPDF(recommendations, formData)}
                 >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
+                  <Download className="mr-1 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Download</span> PDF
                 </Button>
               </div>
             </div>

@@ -130,8 +130,8 @@ const Schemes = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-heading font-bold mb-2">Government Schemes</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">Government Schemes</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Discover agricultural subsidies, programs, and benefits available for farmers
           </p>
         </div>

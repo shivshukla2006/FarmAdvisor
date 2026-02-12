@@ -7,7 +7,7 @@ export const CTA = () => {
     <section className="py-20 px-4 bg-white/95 backdrop-blur-sm">
       <div className="container mx-auto">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold text-foreground">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground">
             Ready to Transform Your Farm?
           </h2>
           <p className="text-xl text-muted-foreground">

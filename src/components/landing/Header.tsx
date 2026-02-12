@@ -19,7 +19,7 @@ export const Header = () => {
         
         <div className="flex items-center gap-3">
           <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-            <SelectTrigger className="w-[120px] bg-white/10 border-white/20 text-white">
+            <SelectTrigger className="w-[90px] sm:w-[120px] bg-white/10 border-white/20 text-white text-xs sm:text-sm">
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent className="bg-popover z-[60]">
