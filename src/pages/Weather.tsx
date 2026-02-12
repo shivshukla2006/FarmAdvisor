@@ -302,10 +302,10 @@ const Weather = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-heading font-bold mb-2">{t("weatherAlerts")}</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2">{t("weatherAlerts")}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               {t("weatherDescription")}
             </p>
           </div>
@@ -513,7 +513,7 @@ const Weather = () => {
                   size="lg"
                 />
                 <div>
-                  <div className="text-6xl font-bold mb-2">{Math.round(currentWeather.temperature)}°C</div>
+                  <div className="text-4xl sm:text-6xl font-bold mb-2">{Math.round(currentWeather.temperature)}°C</div>
                   <div className="text-lg opacity-80 capitalize">{currentWeather.description}</div>
                 </div>
               </div>

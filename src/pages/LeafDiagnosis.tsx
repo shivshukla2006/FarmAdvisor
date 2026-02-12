@@ -92,11 +92,11 @@ const LeafDiagnosis = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-heading font-bold mb-2 flex items-center gap-2">
-            <Leaf className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold mb-1 sm:mb-2 flex items-center gap-2">
+            <Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             Leaf Disease Diagnosis
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Upload a photo of a leaf to identify diseases, get treatment options, and prevention tips
           </p>
         </div>
@@ -108,7 +108,7 @@ const LeafDiagnosis = () => {
               <h2 className="text-xl font-heading font-semibold mb-4">Upload Leaf Image</h2>
               <div className="space-y-4">
                 {!previewUrl ? (
-                  <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary/50 transition-colors">
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-12 text-center hover:border-primary/50 transition-colors">
                     <TreeDeciduous className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-sm text-muted-foreground mb-4">
                       Upload a clear photo of the affected leaf

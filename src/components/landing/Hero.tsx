@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export const Hero = () => {
   return (
-    <section className="pt-32 pb-20 px-4 bg-black/50">
+    <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 bg-black/50">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white border border-white/30 backdrop-blur-sm">
@@ -12,12 +12,12 @@ export const Hero = () => {
             <span className="text-sm font-medium">AI-Powered Agricultural Intelligence</span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight text-white">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight text-white">
             Smart Farming,
             <span className="text-primary"> Better Yields</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl md:text-2xl text-white/80 max-w-2xl mx-auto">
             Get personalized crop recommendations, real-time weather alerts, pest diagnosis, 
             and access to government schemes - all in one platform designed for Indian farmers.
           </p>
