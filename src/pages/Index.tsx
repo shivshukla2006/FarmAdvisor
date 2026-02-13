@@ -4,6 +4,7 @@ import { Features } from "@/components/landing/Features";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { CTA } from "@/components/landing/CTA";
 import { Footer } from "@/components/landing/Footer";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import cropsBg from "@/assets/crops-bg.jpg";
 
 const Index = () => {
@@ -18,6 +19,7 @@ const Index = () => {
       <Testimonials />
       <CTA />
       <Footer />
+      <InstallPrompt />
     </div>
   );
 };
