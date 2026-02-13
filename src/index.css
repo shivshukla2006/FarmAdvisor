@@ -227,3 +227,6 @@ html.transitioning *::after {
 
 /* Google Fonts - Poppins for headings, Open Sans for body */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap');
+
+/* PWA Standalone mode styles — only active when installed on mobile */
+@import "./styles/pwa-standalone.css";

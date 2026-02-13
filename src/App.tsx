@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LeafLoader } from "@/components/ui/LeafLoader";
 import { ThemeProvider } from "next-themes";
+import { useStandaloneMode } from "@/hooks/useStandaloneMode";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -36,8 +37,19 @@ const PageLoader = () => (
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+const App = () => {
+  const isStandalone = useStandaloneMode();
+
+  useEffect(() => {
+    if (isStandalone) {
+      document.documentElement.classList.add("pwa-standalone");
+    } else {
+      document.documentElement.classList.remove("pwa-standalone");
+    }
+  }, [isStandalone]);
+
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -140,6 +152,7 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
   </ThemeProvider>
-);
+  );
+};
 
 export default App;
