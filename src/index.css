@@ -96,7 +96,19 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-body transition-colors duration-300;
+    @apply bg-background text-foreground font-body transition-colors duration-300 antialiased;
+  }
+
+  a {
+    @apply font-medium tracking-wide;
+  }
+
+  button, [role="button"] {
+    @apply font-semibold tracking-wide;
+  }
+
+  nav a, nav button, [role="menuitem"] {
+    @apply font-semibold text-sm tracking-wide;
   }
 
   h1, h2, h3, h4, h5, h6 {
