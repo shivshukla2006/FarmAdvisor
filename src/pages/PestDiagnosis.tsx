@@ -37,6 +37,7 @@ const PestDiagnosis = () => {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [resultLang, setResultLang] = useState<"en" | "hi">("en");
   const { toast } = useToast();
   const { user } = useAuth();
 
