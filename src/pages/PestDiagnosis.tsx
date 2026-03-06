@@ -148,20 +148,25 @@ const PestDiagnosis = () => {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
+  const handleAnalyze = async (langOverride?: "en" | "hi") => {
+    const lang = langOverride || resultLang;
     
     setIsAnalyzing(true);
     setResult(null);
     
     try {
-      // Upload image to storage
-      const imageUrl = await uploadPestImage(selectedFile);
+      let imageUrl = uploadedImageUrl;
       
-      // Diagnose the pest
-      const diagnosis = await diagnosePest({ imageUrl, language: resultLang });
+      // Only upload if not already uploaded
+      if (!imageUrl && selectedFile) {
+        imageUrl = await uploadPestImage(selectedFile);
+        setUploadedImageUrl(imageUrl);
+      }
       
-      // Transform the diagnosis result to match our UI format
+      if (!imageUrl) return;
+      
+      const diagnosis = await diagnosePest({ imageUrl, language: lang });
+      
       setResult({
         pest: diagnosis.pestIdentified,
         confidence: diagnosis.confidence || 0,
@@ -187,12 +192,18 @@ const PestDiagnosis = () => {
         variant: "destructive",
       });
       
-      // Clear the image if it's invalid
       if (errorMessage.toLowerCase().includes('invalid photo')) {
         handleClear();
       }
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleLanguageChange = (lang: "en" | "hi") => {
+    setResultLang(lang);
+    if (uploadedImageUrl && result) {
+      handleAnalyze(lang);
     }
   };
 
