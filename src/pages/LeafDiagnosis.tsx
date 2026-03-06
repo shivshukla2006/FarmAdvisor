@@ -51,14 +51,20 @@ const LeafDiagnosis = () => {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
+  const handleAnalyze = async (langOverride?: "en" | "hi") => {
+    const lang = langOverride || resultLang;
     setIsAnalyzing(true);
     setResult(null);
 
     try {
-      const imageUrl = await uploadLeafImage(selectedFile);
-      const diagnosis = await diagnoseLeaf({ imageUrl });
+      let imageUrl = uploadedImageUrl;
+      if (!imageUrl && selectedFile) {
+        imageUrl = await uploadLeafImage(selectedFile);
+        setUploadedImageUrl(imageUrl);
+      }
+      if (!imageUrl) return;
+      
+      const diagnosis = await diagnoseLeaf({ imageUrl, language: lang });
       setResult(diagnosis);
       toast({ title: "Analysis Complete", description: `Disease identified: ${diagnosis.diseaseName}` });
     } catch (error) {
@@ -67,6 +73,13 @@ const LeafDiagnosis = () => {
       if (errorMessage.toLowerCase().includes("invalid photo")) handleClear();
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleLanguageChange = (lang: "en" | "hi") => {
+    setResultLang(lang);
+    if (uploadedImageUrl && result) {
+      handleAnalyze(lang);
     }
   };
 
