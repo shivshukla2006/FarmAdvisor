@@ -315,7 +315,25 @@ const PestDiagnosis = () => {
                       </span>
                     </div>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-primary" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={resultLang === "en" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setResultLang("en")}
+                      className="text-xs px-2 h-7"
+                    >
+                      EN
+                    </Button>
+                    <Button
+                      variant={resultLang === "hi" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setResultLang("hi")}
+                      className="text-xs px-2 h-7"
+                    >
+                      हिं
+                    </Button>
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
 
                 <p className="text-muted-foreground mb-6">{result.description}</p>
