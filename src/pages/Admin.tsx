@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { UserManagement } from "@/components/admin/UserManagement";
-import { CommunityModeration } from "@/components/admin/CommunityModeration";
+
 import { SchemesManagement } from "@/components/admin/SchemesManagement";
 import { WeatherAlertsManagement } from "@/components/admin/WeatherAlertsManagement";
 import { AdminActivityLog } from "@/components/admin/AdminActivityLog";
