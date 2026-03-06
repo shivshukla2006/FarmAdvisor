@@ -158,7 +158,7 @@ const PestDiagnosis = () => {
       const imageUrl = await uploadPestImage(selectedFile);
       
       // Diagnose the pest
-      const diagnosis = await diagnosePest({ imageUrl });
+      const diagnosis = await diagnosePest({ imageUrl, language: resultLang });
       
       // Transform the diagnosis result to match our UI format
       setResult({
