@@ -3,7 +3,7 @@ import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { CommunityHighlights } from "@/components/dashboard/CommunityHighlights";
+
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { motion } from "framer-motion";
 
