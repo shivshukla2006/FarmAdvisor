@@ -210,6 +210,7 @@ const PestDiagnosis = () => {
   const handleClear = () => {
     setSelectedFile(null);
     setPreviewUrl("");
+    setUploadedImageUrl("");
     setResult(null);
   };
 
