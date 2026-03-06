@@ -188,7 +188,27 @@ const LeafDiagnosis = () => {
                       </Badge>
                     </div>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-primary" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={resultLang === "en" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("en")}
+                      className="text-xs px-2 h-7"
+                      disabled={isAnalyzing}
+                    >
+                      EN
+                    </Button>
+                    <Button
+                      variant={resultLang === "hi" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("hi")}
+                      className="text-xs px-2 h-7"
+                      disabled={isAnalyzing}
+                    >
+                      हिं
+                    </Button>
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
 
                 {/* Plant Identification */}
