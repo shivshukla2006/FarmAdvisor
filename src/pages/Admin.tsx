@@ -105,9 +105,6 @@ const Admin = () => {
             <UserManagement />
           </TabsContent>
 
-          <TabsContent value="community" className="space-y-6">
-            <CommunityModeration />
-          </TabsContent>
 
           <TabsContent value="schemes" className="space-y-6">
             <SchemesManagement />

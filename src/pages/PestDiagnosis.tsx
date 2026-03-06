@@ -376,14 +376,6 @@ const PestDiagnosis = () => {
                   </TabsContent>
                 </Tabs>
 
-                <div className="mt-6 pt-6 border-t">
-                  <Link to="/community">
-                    <Button variant="outline" className="w-full">
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      Get Help from Community
-                    </Button>
-                  </Link>
-                </div>
               </Card>
             )}
           </div>

@@ -52,13 +52,6 @@ const Dashboard = () => {
             >
               <RecentActivity />
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <CommunityHighlights />
-            </motion.div>
           </div>
         </div>
       </motion.div>
