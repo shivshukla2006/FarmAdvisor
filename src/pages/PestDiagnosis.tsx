@@ -33,6 +33,7 @@ interface DiagnosisHistory {
 const PestDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
