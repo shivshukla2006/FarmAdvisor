@@ -296,7 +296,7 @@ const PestDiagnosis = () => {
                     
                     <Button
                       className="w-full"
-                      onClick={handleAnalyze}
+                      onClick={() => handleAnalyze()}
                       disabled={isAnalyzing}
                     >
                       {isAnalyzing ? (
