@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History } from "lucide-react";
+import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { diagnosePest, uploadPestImage } from "@/services/pestDiagnosisService";
@@ -33,10 +33,12 @@ interface DiagnosisHistory {
 const PestDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [resultLang, setResultLang] = useState<"en" | "hi">("en");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -146,20 +148,25 @@ const PestDiagnosis = () => {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
+  const handleAnalyze = async (langOverride?: "en" | "hi") => {
+    const lang = langOverride || resultLang;
     
     setIsAnalyzing(true);
     setResult(null);
     
     try {
-      // Upload image to storage
-      const imageUrl = await uploadPestImage(selectedFile);
+      let imageUrl = uploadedImageUrl;
       
-      // Diagnose the pest
-      const diagnosis = await diagnosePest({ imageUrl });
+      // Only upload if not already uploaded
+      if (!imageUrl && selectedFile) {
+        imageUrl = await uploadPestImage(selectedFile);
+        setUploadedImageUrl(imageUrl);
+      }
       
-      // Transform the diagnosis result to match our UI format
+      if (!imageUrl) return;
+      
+      const diagnosis = await diagnosePest({ imageUrl, language: lang });
+      
       setResult({
         pest: diagnosis.pestIdentified,
         confidence: diagnosis.confidence || 0,
@@ -185,7 +192,6 @@ const PestDiagnosis = () => {
         variant: "destructive",
       });
       
-      // Clear the image if it's invalid
       if (errorMessage.toLowerCase().includes('invalid photo')) {
         handleClear();
       }
@@ -194,9 +200,17 @@ const PestDiagnosis = () => {
     }
   };
 
+  const handleLanguageChange = (lang: "en" | "hi") => {
+    setResultLang(lang);
+    if (uploadedImageUrl && result) {
+      handleAnalyze(lang);
+    }
+  };
+
   const handleClear = () => {
     setSelectedFile(null);
     setPreviewUrl("");
+    setUploadedImageUrl("");
     setResult(null);
   };
 
@@ -283,7 +297,7 @@ const PestDiagnosis = () => {
                     
                     <Button
                       className="w-full"
-                      onClick={handleAnalyze}
+                      onClick={() => handleAnalyze()}
                       disabled={isAnalyzing}
                     >
                       {isAnalyzing ? (
@@ -314,7 +328,25 @@ const PestDiagnosis = () => {
                       </span>
                     </div>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-primary" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={resultLang === "en" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("en")}
+                      className="text-xs px-2 h-7"
+                    >
+                      EN
+                    </Button>
+                    <Button
+                      variant={resultLang === "hi" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("hi")}
+                      className="text-xs px-2 h-7"
+                    >
+                      हिं
+                    </Button>
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
 
                 <p className="text-muted-foreground mb-6">{result.description}</p>

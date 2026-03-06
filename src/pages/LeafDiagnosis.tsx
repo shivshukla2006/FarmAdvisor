@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Beaker, TreeDeciduous } from "lucide-react";
+import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Beaker, TreeDeciduous, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/services/leafDiagnosisService";
 
 const LeafDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
+  const [resultLang, setResultLang] = useState<"en" | "hi">("en");
   const { toast } = useToast();
 
   const handleCameraCapture = () => {
@@ -49,14 +51,20 @@ const LeafDiagnosis = () => {
     }
   };
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
+  const handleAnalyze = async (langOverride?: "en" | "hi") => {
+    const lang = langOverride || resultLang;
     setIsAnalyzing(true);
     setResult(null);
 
     try {
-      const imageUrl = await uploadLeafImage(selectedFile);
-      const diagnosis = await diagnoseLeaf({ imageUrl });
+      let imageUrl = uploadedImageUrl;
+      if (!imageUrl && selectedFile) {
+        imageUrl = await uploadLeafImage(selectedFile);
+        setUploadedImageUrl(imageUrl);
+      }
+      if (!imageUrl) return;
+      
+      const diagnosis = await diagnoseLeaf({ imageUrl, language: lang });
       setResult(diagnosis);
       toast({ title: "Analysis Complete", description: `Disease identified: ${diagnosis.diseaseName}` });
     } catch (error) {
@@ -68,9 +76,17 @@ const LeafDiagnosis = () => {
     }
   };
 
+  const handleLanguageChange = (lang: "en" | "hi") => {
+    setResultLang(lang);
+    if (uploadedImageUrl && result) {
+      handleAnalyze(lang);
+    }
+  };
+
   const handleClear = () => {
     setSelectedFile(null);
     setPreviewUrl("");
+    setUploadedImageUrl("");
     setResult(null);
   };
 
@@ -136,7 +152,7 @@ const LeafDiagnosis = () => {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Button className="w-full" onClick={handleAnalyze} disabled={isAnalyzing}>
+                    <Button className="w-full" onClick={() => handleAnalyze()} disabled={isAnalyzing}>
                       {isAnalyzing ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -172,7 +188,27 @@ const LeafDiagnosis = () => {
                       </Badge>
                     </div>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-primary" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={resultLang === "en" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("en")}
+                      className="text-xs px-2 h-7"
+                      disabled={isAnalyzing}
+                    >
+                      EN
+                    </Button>
+                    <Button
+                      variant={resultLang === "hi" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleLanguageChange("hi")}
+                      className="text-xs px-2 h-7"
+                      disabled={isAnalyzing}
+                    >
+                      हिं
+                    </Button>
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
 
                 {/* Plant Identification */}

@@ -51,7 +51,8 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, cropType } = await req.json();
+    const { imageUrl, cropType, language } = await req.json();
+    const responseLanguage = language === 'hi' ? 'Hindi' : 'English';
 
     if (!validateImageUrl(imageUrl)) {
       throw new Error('Invalid image URL: must be a valid HTTPS URL from allowed storage');
@@ -119,7 +120,9 @@ If the image DOES show agricultural content, analyze it and respond with:
   "spreadRisk": "low" | "medium" | "high"
 }
 
-${cropType ? `Crop Type: ${cropType}` : ''}`;
+${cropType ? `Crop Type: ${cropType}` : ''}
+
+IMPORTANT: Provide ALL text content (descriptions, symptoms, causes, treatment descriptions, preventive measures, method names, timing, precautions) in ${responseLanguage} language.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

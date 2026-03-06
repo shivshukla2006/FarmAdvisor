@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface LeafDiagnosisInput {
   imageUrl: string;
   cropType?: string;
+  language?: string;
 }
 
 export interface LeafDiagnosisResult {

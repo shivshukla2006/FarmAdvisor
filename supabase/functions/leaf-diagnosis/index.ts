@@ -34,7 +34,8 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, cropType } = await req.json();
+    const { imageUrl, cropType, language } = await req.json();
+    const responseLanguage = language === 'hi' ? 'Hindi' : 'English';
 
     if (!validateImageUrl(imageUrl)) {
       throw new Error('Invalid image URL: must be a valid HTTPS URL from allowed storage');
@@ -99,7 +100,9 @@ If the image DOES show leaves/plant foliage, FIRST identify the plant and leaf t
 }
 
 ${cropType ? `Crop Type: ${cropType}` : ''}
-Provide actionable, farmer-friendly advice. Include both organic and chemical treatment options.`;
+Provide actionable, farmer-friendly advice. Include both organic and chemical treatment options.
+
+IMPORTANT: Provide ALL text content (descriptions, symptoms, causes, treatment descriptions, preventive measures, method names, timing, precautions, common names) in ${responseLanguage} language. Keep scientific/botanical names in Latin.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
