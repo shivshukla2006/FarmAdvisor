@@ -10,7 +10,7 @@ import {
   Users, 
   Shield, 
   FileText, 
-  MessageSquare, 
+   
   CloudRain, 
   BarChart3,
   Settings,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { UserManagement } from "@/components/admin/UserManagement";
-import { CommunityModeration } from "@/components/admin/CommunityModeration";
+
 import { SchemesManagement } from "@/components/admin/SchemesManagement";
 import { WeatherAlertsManagement } from "@/components/admin/WeatherAlertsManagement";
 import { AdminActivityLog } from "@/components/admin/AdminActivityLog";
@@ -45,7 +45,7 @@ const Admin = () => {
   const tabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "users", label: "Users", icon: Users },
-    { id: "community", label: "Community", icon: MessageSquare },
+    
     { id: "schemes", label: "Schemes", icon: FileText },
     { id: "weather", label: "Weather Alerts", icon: CloudRain },
     { id: "activity", label: "Activity Log", icon: Activity },
@@ -105,9 +105,6 @@ const Admin = () => {
             <UserManagement />
           </TabsContent>
 
-          <TabsContent value="community" className="space-y-6">
-            <CommunityModeration />
-          </TabsContent>
 
           <TabsContent value="schemes" className="space-y-6">
             <SchemesManagement />

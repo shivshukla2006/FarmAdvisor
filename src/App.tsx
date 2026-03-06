@@ -20,7 +20,7 @@ const Recommendations = lazy(() => import("./pages/Recommendations"));
 const Weather = lazy(() => import("./pages/Weather"));
 const PestDiagnosis = lazy(() => import("./pages/PestDiagnosis"));
 const Schemes = lazy(() => import("./pages/Schemes"));
-const Community = lazy(() => import("./pages/Community"));
+
 const Analytics = lazy(() => import("./pages/Analytics"));
 const LeafDiagnosis = lazy(() => import("./pages/LeafDiagnosis"));
 const Admin = lazy(() => import("./pages/Admin"));
@@ -107,14 +107,6 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Schemes />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/community"
-                element={
-                  <ProtectedRoute>
-                    <Community />
                   </ProtectedRoute>
                 }
               />

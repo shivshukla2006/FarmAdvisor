@@ -3,7 +3,7 @@ import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { CommunityHighlights } from "@/components/dashboard/CommunityHighlights";
+
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { motion } from "framer-motion";
 
@@ -51,13 +51,6 @@ const Dashboard = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <RecentActivity />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <CommunityHighlights />
             </motion.div>
           </div>
         </div>

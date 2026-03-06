@@ -34,7 +34,7 @@ export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => 
     { icon: CloudRain, label: t("weather"), path: "/weather" },
     { icon: Bug, label: t("pestDiagnosis"), path: "/pest-diagnosis" },
     { icon: Newspaper, label: t("schemes"), path: "/schemes" },
-    { icon: Users, label: t("community"), path: "/community" },
+    
     { icon: TreeDeciduous, label: t("leafDiagnosis"), path: "/leaf-diagnosis" },
     { icon: BarChart3, label: t("analytics"), path: "/analytics" },
     ...(isAdmin ? [{ icon: Shield, label: "Admin Panel", path: "/admin" }] : []),
