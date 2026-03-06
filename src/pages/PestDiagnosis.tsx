@@ -339,7 +339,7 @@ const PestDiagnosis = () => {
                     <Button
                       variant={resultLang === "hi" ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setResultLang("hi")}
+                      onClick={() => handleLanguageChange("hi")}
                       className="text-xs px-2 h-7"
                     >
                       हिं
