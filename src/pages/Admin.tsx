@@ -45,7 +45,7 @@ const Admin = () => {
   const tabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "users", label: "Users", icon: Users },
-    { id: "community", label: "Community", icon: MessageSquare },
+    
     { id: "schemes", label: "Schemes", icon: FileText },
     { id: "weather", label: "Weather Alerts", icon: CloudRain },
     { id: "activity", label: "Activity Log", icon: Activity },
