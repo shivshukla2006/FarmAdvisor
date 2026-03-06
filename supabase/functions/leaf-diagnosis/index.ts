@@ -34,7 +34,8 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, cropType } = await req.json();
+    const { imageUrl, cropType, language } = await req.json();
+    const responseLanguage = language === 'hi' ? 'Hindi' : 'English';
 
     if (!validateImageUrl(imageUrl)) {
       throw new Error('Invalid image URL: must be a valid HTTPS URL from allowed storage');
