@@ -120,7 +120,9 @@ If the image DOES show agricultural content, analyze it and respond with:
   "spreadRisk": "low" | "medium" | "high"
 }
 
-${cropType ? `Crop Type: ${cropType}` : ''}`;
+${cropType ? `Crop Type: ${cropType}` : ''}
+
+IMPORTANT: Provide ALL text content (descriptions, symptoms, causes, treatment descriptions, preventive measures, method names, timing, precautions) in ${responseLanguage} language.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
