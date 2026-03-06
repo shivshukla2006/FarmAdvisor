@@ -12,8 +12,10 @@ import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/servi
 const LeafDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
+  const [resultLang, setResultLang] = useState<"en" | "hi">("en");
   const { toast } = useToast();
 
   const handleCameraCapture = () => {
