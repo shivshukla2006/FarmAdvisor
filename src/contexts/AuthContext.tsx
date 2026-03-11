@@ -9,6 +9,8 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithOtp: (email: string) => Promise<{ error: any }>;
+  verifyOtp: (email: string, token: string, type: 'signup' | 'email') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
@@ -36,7 +38,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -45,7 +46,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -83,6 +83,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { error };
   };
 
+  const signInWithOtp = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    return { error };
+  };
+
+  const verifyOtp = async (email: string, token: string, type: 'signup' | 'email') => {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type });
+    if (!error) {
+      navigate('/dashboard');
+    }
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
@@ -107,18 +120,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const deleteAccount = async () => {
-    // First delete the user's profile data
     if (user) {
       await supabase.from('profiles').delete().eq('id', user.id);
       await supabase.from('crop_recommendations').delete().eq('user_id', user.id);
       await supabase.from('pest_diagnoses').delete().eq('user_id', user.id);
       await supabase.from('user_activities').delete().eq('user_id', user.id);
       await supabase.from('scheme_bookmarks').delete().eq('user_id', user.id);
-      await supabase.from('community_posts').delete().eq('user_id', user.id);
-      await supabase.from('community_replies').delete().eq('user_id', user.id);
     }
     
-    // Sign out the user (Supabase doesn't allow self-deletion from client)
     await supabase.auth.signOut();
     navigate('/');
     
@@ -131,6 +140,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signUp,
     signIn,
+    signInWithOtp,
+    verifyOtp,
     signOut,
     resetPassword,
     updatePassword,
