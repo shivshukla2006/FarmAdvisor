@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const registerSchema = z.object({
   fullName: z.string().min(2, { message: "Name must be at least 2 characters" }).max(100),
@@ -46,9 +47,10 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   onSuccess?: () => void;
+  onOtpRequest?: (email: string) => void;
 }
 
-export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
+export const RegisterForm = ({ onSuccess, onOtpRequest }: RegisterFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const { toast } = useToast();
@@ -89,14 +91,28 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       setIsLoading(false);
       return;
     }
+
+    // Send OTP to the registered email for verification
+    const { error: otpError } = await supabase.auth.signInWithOtp({ email: data.email });
+
+    if (otpError) {
+      toast({
+        title: "Registration Successful",
+        description: "Account created but failed to send OTP. Please try logging in with OTP.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      onSuccess?.();
+      return;
+    }
     
     toast({
-      title: "Registration Successful",
-      description: "Your account has been created. Please sign in.",
+      title: "Account Created!",
+      description: "A verification code has been sent to your email.",
     });
     
     setIsLoading(false);
-    onSuccess?.();
+    onOtpRequest?.(data.email);
   };
 
   const nextStep = async () => {

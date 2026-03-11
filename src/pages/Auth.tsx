@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { OtpVerification } from "@/components/auth/OtpVerification";
 import { Sprout } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +11,7 @@ import cropsBg from "@/assets/crops-bg.jpg";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [otpState, setOtpState] = useState<{ email: string; mode: "signup" | "login" } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -19,13 +21,17 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  const handleOtpRequest = (email: string, mode: "signup" | "login") => {
+    setOtpState({ email, mode });
+  };
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center px-4 py-12 bg-cover bg-center bg-fixed"
       style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${cropsBg})` }}
     >
       <div className="w-full max-w-md">
-      <div className="text-center mb-8">
+        <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <Sprout className="h-8 w-8 text-primary" />
             <span className="font-heading font-bold text-2xl text-white">FarmAdvisor</span>
@@ -35,20 +41,28 @@ const Auth = () => {
         </div>
 
         <Card className="p-6 bg-card border-border">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <LoginForm />
-            </TabsContent>
-            
-            <TabsContent value="register">
-              <RegisterForm onSuccess={() => setActiveTab("login")} />
-            </TabsContent>
-          </Tabs>
+          {otpState ? (
+            <OtpVerification
+              email={otpState.email}
+              mode={otpState.mode}
+              onBack={() => setOtpState(null)}
+            />
+          ) : (
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <LoginForm onOtpRequest={(email) => handleOtpRequest(email, "login")} />
+              </TabsContent>
+              
+              <TabsContent value="register">
+                <RegisterForm onOtpRequest={(email) => handleOtpRequest(email, "signup")} />
+              </TabsContent>
+            </Tabs>
+          )}
         </Card>
 
         <p className="text-center text-sm text-white/70 mt-4">
