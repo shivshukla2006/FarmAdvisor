@@ -339,7 +339,23 @@ const PestDiagnosis = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select value={listenLang} onValueChange={setListenLang}>
+                      <SelectTrigger className="w-20 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">EN</SelectItem>
+                        <SelectItem value="hi">हिन्दी</SelectItem>
+                        <SelectItem value="mr">मराठी</SelectItem>
+                        <SelectItem value="ta">தமிழ்</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <ListenButton 
+                      text={buildPestListenText()} 
+                      language={listenLang}
+                      size="sm"
+                    />
                     <Button
                       variant={resultLang === "en" ? "default" : "outline"}
                       size="sm"
@@ -357,6 +373,7 @@ const PestDiagnosis = () => {
                       हिं
                     </Button>
                     <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                   </div>
                 </div>
 
