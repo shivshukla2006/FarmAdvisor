@@ -18,7 +18,20 @@ const LeafDiagnosis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
+  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
+
+  const buildLeafListenText = () => {
+    if (!result) return "";
+    let text = `Disease: ${result.diseaseName}. Severity: ${result.severity}. ${result.description}. `;
+    if (result.treatmentRecommendations?.length) {
+      text += `Treatment: ${result.treatmentRecommendations.map(t => `${t.method}: ${t.description}`).join(". ")}. `;
+    }
+    if (result.preventionMeasures?.length) {
+      text += `Prevention: ${result.preventionMeasures.join(". ")}`;
+    }
+    return text;
+  };
 
   const handleCameraCapture = () => {
     const input = document.createElement("input");
