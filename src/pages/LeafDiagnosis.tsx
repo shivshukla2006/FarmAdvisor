@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Beaker, TreeDeciduous, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/services/leafDiagnosisService";
+import { ListenButton } from "@/components/ui/ListenButton";
 
 const LeafDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -16,7 +18,20 @@ const LeafDiagnosis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
+  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
+
+  const buildLeafListenText = () => {
+    if (!result) return "";
+    let text = `Disease: ${result.diseaseName}. Severity: ${result.severity}. ${result.description}. `;
+    if (result.treatmentRecommendations?.length) {
+      text += `Treatment: ${result.treatmentRecommendations.map(t => `${t.method}: ${t.description}`).join(". ")}. `;
+    }
+    if (result.preventionMeasures?.length) {
+      text += `Prevention: ${result.preventionMeasures.join(". ")}`;
+    }
+    return text;
+  };
 
   const handleCameraCapture = () => {
     const input = document.createElement("input");
@@ -188,7 +203,23 @@ const LeafDiagnosis = () => {
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select value={listenLang} onValueChange={setListenLang}>
+                      <SelectTrigger className="w-20 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">EN</SelectItem>
+                        <SelectItem value="hi">हिन्दी</SelectItem>
+                        <SelectItem value="mr">मराठी</SelectItem>
+                        <SelectItem value="ta">தமிழ்</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <ListenButton 
+                      text={buildLeafListenText()} 
+                      language={listenLang}
+                      size="sm"
+                    />
                     <Button
                       variant={resultLang === "en" ? "default" : "outline"}
                       size="sm"

@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { ListenButton } from "@/components/ui/ListenButton";
 import { diagnosePest, uploadPestImage } from "@/services/pestDiagnosisService";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,8 +41,17 @@ const PestDiagnosis = () => {
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
+  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const buildPestListenText = () => {
+    if (!result) return "";
+    let text = `Pest identified: ${result.pest}. Severity: ${result.severity}. ${result.description}. `;
+    if (result.treatment.length > 0) text += `Treatment: ${result.treatment.join(". ")}. `;
+    if (result.prevention.length > 0) text += `Prevention: ${result.prevention.join(". ")}`;
+    return text;
+  };
 
   // Fetch initial history and set up real-time subscription
   useEffect(() => {
@@ -328,7 +339,23 @@ const PestDiagnosis = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select value={listenLang} onValueChange={setListenLang}>
+                      <SelectTrigger className="w-20 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">EN</SelectItem>
+                        <SelectItem value="hi">हिन्दी</SelectItem>
+                        <SelectItem value="mr">मराठी</SelectItem>
+                        <SelectItem value="ta">தமிழ்</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <ListenButton 
+                      text={buildPestListenText()} 
+                      language={listenLang}
+                      size="sm"
+                    />
                     <Button
                       variant={resultLang === "en" ? "default" : "outline"}
                       size="sm"

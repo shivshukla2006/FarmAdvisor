@@ -6,10 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Leaf, MapPin, Calendar, Bookmark, Share2, Loader2, Download } from "lucide-react";
+import { Leaf, MapPin, Calendar, Bookmark, Share2, Loader2, Download, Mic, MicOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCropRecommendations, type CropRecommendation } from "@/services/cropRecommendationService";
 import { generateRecommendationsPDF } from "@/utils/pdfGenerator";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { ListenButton } from "@/components/ui/ListenButton";
+import { supabase } from "@/integrations/supabase/client";
 
 const soilTypes = ["Loamy (दोमट)", "Clay (चिकनी मिट्टी)", "Sandy (बलुई)", "Silt (गाद)", "Red Soil (लाल मिट्टी)", "Black Soil (काली मिट्टी)", "Alluvial (जलोढ़)"];
 const seasons = ["Kharif (बरसात - Monsoon)", "Rabi (सर्दी - Winter)", "Zaid (गर्मी - Summer)"];
@@ -18,6 +21,7 @@ const cropOptions = ["Rice (चावल)", "Wheat (गेहूं)", "Cotton (
 const Recommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocationLoading, setIsLocationLoading] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [recommendations, setRecommendations] = useState<CropRecommendation[]>([]);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -27,7 +31,55 @@ const Recommendations = () => {
     location: "",
     selectedCrops: [] as string[],
   });
+  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
+
+  const voiceInput = useVoiceInput({
+    language: "en-IN",
+    onResult: async (transcript) => {
+      await parseVoiceInput(transcript);
+    },
+    onError: (error) => {
+      toast({
+        title: "Voice Input Error",
+        description: error === "not-allowed" 
+          ? "Please allow microphone access to use voice input" 
+          : `Error: ${error}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const parseVoiceInput = async (transcript: string) => {
+    setIsParsing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-voice-input", {
+        body: { transcript },
+      });
+
+      if (error) throw error;
+
+      if (data.soilType) setFormData(prev => ({ ...prev, soilType: data.soilType }));
+      if (data.season) setFormData(prev => ({ ...prev, season: data.season }));
+      if (data.location) setFormData(prev => ({ ...prev, location: data.location }));
+      if (data.selectedCrops?.length) setFormData(prev => ({ ...prev, selectedCrops: data.selectedCrops }));
+
+      const filled = [data.soilType && "soil type", data.season && "season", data.location && "location", data.selectedCrops?.length && "crops"].filter(Boolean);
+      toast({
+        title: "Voice Input Processed",
+        description: filled.length > 0 ? `Filled: ${filled.join(", ")}` : "Couldn't extract details. Please try again.",
+      });
+    } catch (error) {
+      console.error("Error parsing voice input:", error);
+      toast({
+        title: "Parse Error",
+        description: "Failed to process voice input. Please try again or fill the form manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   // Fetch user's real-time location on mount
   useEffect(() => {
@@ -52,7 +104,6 @@ const Recommendations = () => {
         setCoordinates({ lat: latitude, lng: longitude });
 
         try {
-          // Reverse geocode to get location name
           const response = await fetch(
             `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=b1b15e88fa797225412429c1c50c122a`
           );
@@ -137,6 +188,14 @@ const Recommendations = () => {
     });
   };
 
+  const buildListenText = (crop: CropRecommendation) => {
+    return `${crop.name}. Suitability: ${crop.suitability}. Timing: ${crop.timing}. Expected Yield: ${crop.expectedYield}. Care Instructions: ${crop.careInstructions}`;
+  };
+
+  const buildFullListenText = () => {
+    return recommendations.map(crop => buildListenText(crop)).join(". Next recommendation: ");
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -148,6 +207,50 @@ const Recommendations = () => {
         </div>
 
         <Card className="p-6">
+          {/* Voice Input Section */}
+          <div className="mb-6 p-4 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <Button
+                type="button"
+                variant={voiceInput.isListening ? "default" : "outline"}
+                size="lg"
+                onClick={voiceInput.toggleListening}
+                disabled={!voiceInput.isSupported || isParsing}
+                className={`gap-2 ${voiceInput.isListening ? "animate-pulse bg-destructive hover:bg-destructive/90" : ""}`}
+              >
+                {voiceInput.isListening ? (
+                  <>
+                    <MicOff className="h-5 w-5" />
+                    Stop Recording
+                  </>
+                ) : isParsing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Mic className="h-5 w-5" />
+                    Speak Your Details
+                  </>
+                )}
+              </Button>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  {voiceInput.isListening 
+                    ? "Listening... Say something like: \"My soil is clay, I'm in Pune, season is Kharif, I want to grow rice and wheat\""
+                    : "Click to speak all your farming details at once — soil type, location, season, and crops"}
+                </p>
+                {voiceInput.transcript && (
+                  <p className="text-sm mt-2 p-2 bg-background rounded border">
+                    <span className="text-muted-foreground">Heard: </span>
+                    <span className="font-medium">{voiceInput.transcript}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -241,7 +344,24 @@ const Recommendations = () => {
           <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <h2 className="text-xl sm:text-2xl font-heading font-bold">Your Recommendations</h2>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap items-center">
+                {/* Language selector for listen */}
+                <Select value={listenLang} onValueChange={setListenLang}>
+                  <SelectTrigger className="w-24 h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">हिन्दी</SelectItem>
+                    <SelectItem value="mr">मराठी</SelectItem>
+                    <SelectItem value="ta">தமிழ்</SelectItem>
+                  </SelectContent>
+                </Select>
+                <ListenButton 
+                  text={buildFullListenText()} 
+                  language={listenLang}
+                  label="Listen All"
+                />
                 <Button variant="outline" size="sm" onClick={handleSave}>
                   <Bookmark className="mr-1 sm:mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Save</span>
@@ -269,7 +389,15 @@ const Recommendations = () => {
                       <h3 className="text-xl font-heading font-bold mb-1">{crop.name}</h3>
                       <span className="text-sm text-primary font-medium">{crop.suitability}</span>
                     </div>
-                    <Leaf className="h-8 w-8 text-primary" />
+                    <div className="flex items-center gap-1">
+                      <ListenButton 
+                        text={buildListenText(crop)} 
+                        language={listenLang}
+                        size="icon"
+                        variant="ghost"
+                      />
+                      <Leaf className="h-8 w-8 text-primary" />
+                    </div>
                   </div>
 
                   <div className="space-y-3">
