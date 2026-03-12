@@ -10,7 +10,6 @@ import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Bea
 import { useToast } from "@/hooks/use-toast";
 import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/services/leafDiagnosisService";
 import { ListenButton } from "@/components/ui/ListenButton";
-import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/services/leafDiagnosisService";
 
 const LeafDiagnosis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
