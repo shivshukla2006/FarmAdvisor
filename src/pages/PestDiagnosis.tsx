@@ -41,8 +41,17 @@ const PestDiagnosis = () => {
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
+  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const buildPestListenText = () => {
+    if (!result) return "";
+    let text = `Pest identified: ${result.pest}. Severity: ${result.severity}. ${result.description}. `;
+    if (result.treatment.length > 0) text += `Treatment: ${result.treatment.join(". ")}. `;
+    if (result.prevention.length > 0) text += `Prevention: ${result.prevention.join(". ")}`;
+    return text;
+  };
 
   // Fetch initial history and set up real-time subscription
   useEffect(() => {
