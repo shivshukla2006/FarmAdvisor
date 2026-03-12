@@ -374,7 +374,6 @@ const PestDiagnosis = () => {
                     </Button>
                     <CheckCircle className="h-8 w-8 text-primary" />
                   </div>
-                  </div>
                 </div>
 
                 <p className="text-muted-foreground mb-6">{result.description}</p>
