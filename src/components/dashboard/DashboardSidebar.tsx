@@ -54,6 +54,8 @@ export const DashboardSidebar = ({ isOpen, onClose, onMouseEnter, onMouseLeave }
 
       {/* Sidebar */}
       <aside
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         className={cn(
           "fixed top-16 left-0 bottom-0 z-40 w-64 bg-gradient-to-b from-sidebar-background/98 via-sidebar-background/95 to-sidebar-background/90 backdrop-blur-md border-r border-sidebar-border/50 transition-transform duration-300 shadow-xl shadow-primary/5",
           isOpen ? "translate-x-0" : "-translate-x-full"
