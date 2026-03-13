@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardSidebar } from "./DashboardSidebar";
@@ -7,13 +7,26 @@ import { WeatherAlertBanner } from "./WeatherAlertBanner";
 import { DashboardFooter } from "./DashboardFooter";
 import { ChatbotProvider } from "@/contexts/ChatbotContext";
 import cropsBg from "@/assets/crops-bg.jpg";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hoverOpen, setHoverOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const effectiveOpen = sidebarOpen || hoverOpen;
+
+  const handleMouseEnter = useCallback(() => {
+    if (!isMobile && !sidebarOpen) setHoverOpen(true);
+  }, [isMobile, sidebarOpen]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!isMobile && !sidebarOpen) setHoverOpen(false);
+  }, [isMobile, sidebarOpen]);
 
   return (
     <ChatbotProvider>
@@ -26,11 +39,23 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
         <div className="flex flex-1 pt-16">
-          <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          {/* Hover trigger zone on left edge */}
+          {!effectiveOpen && !isMobile && (
+            <div
+              className="fixed top-16 left-0 bottom-0 w-4 z-30"
+              onMouseEnter={handleMouseEnter}
+            />
+          )}
+          <DashboardSidebar
+            isOpen={effectiveOpen}
+            onClose={() => { setSidebarOpen(false); setHoverOpen(false); }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          />
           
           <main className={cn(
             "flex-1 p-3 sm:p-4 md:p-6 lg:p-8 transition-all duration-300",
-            sidebarOpen && "lg:ml-64"
+            effectiveOpen && "lg:ml-64"
           )}>
             <div className="max-w-7xl mx-auto">
               {children}
