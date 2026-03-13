@@ -20,9 +20,11 @@ import {
 interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-export const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ isOpen, onClose, onMouseEnter, onMouseLeave }: DashboardSidebarProps) => {
   const location = useLocation();
   const { openChatbot } = useChatbot();
   const { t } = useLanguage();
