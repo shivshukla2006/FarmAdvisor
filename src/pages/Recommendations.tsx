@@ -259,10 +259,21 @@ const Recommendations = () => {
                       : "Click to speak all your farming details at once — soil type, location, season, and crops"}
                 </p>
                 {voiceInput.transcript && (
-                  <p className="text-sm mt-2 p-2 bg-background rounded border">
-                    <span className="text-muted-foreground">Heard: </span>
-                    <span className="font-medium">{voiceInput.transcript}</span>
-                  </p>
+                  <div className="flex items-start gap-2 mt-2">
+                    <p className="text-sm p-2 bg-background rounded border flex-1">
+                      <span className="text-muted-foreground">Heard: </span>
+                      <span className="font-medium">{voiceInput.transcript}</span>
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => voiceInput.clearTranscript()}
+                      className="shrink-0 text-muted-foreground hover:text-destructive"
+                    >
+                      ✕ Clear
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
