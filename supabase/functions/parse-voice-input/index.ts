@@ -31,7 +31,7 @@ The user may speak in English, Hindi, or a mix. Match their intent to the closes
 Return ONLY a JSON object with the fields you could extract. Omit fields you couldn't determine.
 Example: {"soilType": "Clay (चिकनी मिट्टी)", "season": "Kharif (बरसात - Monsoon)", "location": "Pune", "selectedCrops": ["Rice (चावल)", "Wheat (गेहूं)"]}`;
 
-    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

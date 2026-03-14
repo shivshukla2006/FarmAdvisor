@@ -24,7 +24,7 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
     const recognition = new SpeechRecognition();
 
     recognition.lang = options.language || "en-IN";
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.interimResults = true;
 
     let finalTranscript = "";
