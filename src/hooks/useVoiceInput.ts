@@ -10,6 +10,7 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+  const clearedRef = useRef(false);
 
   const isSupported = typeof window !== "undefined" && 
     ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
@@ -19,6 +20,8 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
       options.onError?.("Speech recognition is not supported in this browser");
       return;
     }
+
+    clearedRef.current = false;
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
@@ -36,11 +39,12 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
     };
 
     recognition.onresult = (event: any) => {
-      // Only take the last final result to avoid duplication
       const lastResult = event.results[event.results.length - 1];
       if (lastResult.isFinal) {
         finalTranscript = lastResult[0].transcript.trim();
-        setTranscript(finalTranscript);
+        if (!clearedRef.current) {
+          setTranscript(finalTranscript);
+        }
       }
     };
 
@@ -54,10 +58,12 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
 
     recognition.onend = () => {
       setIsListening(false);
-      const result = finalTranscript.trim();
-      if (result) {
-        setTranscript(result);
-        options.onResult?.(result);
+      if (!clearedRef.current) {
+        const result = finalTranscript.trim();
+        if (result) {
+          setTranscript(result);
+          options.onResult?.(result);
+        }
       }
     };
 
@@ -80,6 +86,7 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
   }, [isListening, startListening, stopListening]);
 
   const clearTranscript = useCallback(() => {
+    clearedRef.current = true;
     setTranscript("");
   }, []);
 
