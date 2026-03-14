@@ -36,9 +36,6 @@ const Recommendations = () => {
 
   const voiceInput = useVoiceInput({
     language: "en-IN",
-    onResult: async (transcript) => {
-      await parseVoiceInput(transcript);
-    },
     onError: (error) => {
       toast({
         title: "Voice Input Error",
@@ -49,6 +46,12 @@ const Recommendations = () => {
       });
     },
   });
+
+  const handleVoiceSubmit = async () => {
+    if (voiceInput.transcript.trim()) {
+      await parseVoiceInput(voiceInput.transcript.trim());
+    }
+  };
 
   const parseVoiceInput = async (transcript: string) => {
     setIsParsing(true);
