@@ -226,11 +226,6 @@ const Recommendations = () => {
                     <MicOff className="h-5 w-5" />
                     Stop Recording
                   </>
-                ) : isParsing ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Processing...
-                  </>
                 ) : (
                   <>
                     <Mic className="h-5 w-5" />
@@ -238,11 +233,30 @@ const Recommendations = () => {
                   </>
                 )}
               </Button>
+              {!voiceInput.isListening && voiceInput.transcript && !isParsing && (
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={handleVoiceSubmit}
+                  className="gap-2"
+                >
+                  <Leaf className="h-5 w-5" />
+                  Submit Voice Input
+                </Button>
+              )}
+              {isParsing && (
+                <Button type="button" size="lg" disabled className="gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Processing...
+                </Button>
+              )}
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">
                   {voiceInput.isListening 
                     ? "Listening... Say something like: \"My soil is clay, I'm in Pune, season is Kharif, I want to grow rice and wheat\""
-                    : "Click to speak all your farming details at once — soil type, location, season, and crops"}
+                    : voiceInput.transcript 
+                      ? "Review what was heard, then click 'Submit Voice Input' to fill the form"
+                      : "Click to speak all your farming details at once — soil type, location, season, and crops"}
                 </p>
                 {voiceInput.transcript && (
                   <p className="text-sm mt-2 p-2 bg-background rounded border">
