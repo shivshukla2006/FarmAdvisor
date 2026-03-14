@@ -25,7 +25,7 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
 
     recognition.lang = options.language || "en-IN";
     recognition.continuous = false;
-    recognition.interimResults = true;
+    recognition.interimResults = false;
 
     let finalTranscript = "";
 
@@ -36,16 +36,12 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
     };
 
     recognition.onresult = (event: any) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += t + " ";
-        } else {
-          interim += t;
-        }
+      // Only take the last final result to avoid duplication
+      const lastResult = event.results[event.results.length - 1];
+      if (lastResult.isFinal) {
+        finalTranscript = lastResult[0].transcript.trim();
+        setTranscript(finalTranscript);
       }
-      setTranscript(finalTranscript + interim);
     };
 
     recognition.onerror = (event: any) => {
