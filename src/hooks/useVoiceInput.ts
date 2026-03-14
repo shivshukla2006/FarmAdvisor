@@ -79,6 +79,10 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
     }
   }, [isListening, startListening, stopListening]);
 
+  const clearTranscript = useCallback(() => {
+    setTranscript("");
+  }, []);
+
   return {
     isListening,
     transcript,
@@ -86,5 +90,6 @@ export const useVoiceInput = (options: UseVoiceInputOptions = {}) => {
     startListening,
     stopListening,
     toggleListening,
+    clearTranscript,
   };
 };
