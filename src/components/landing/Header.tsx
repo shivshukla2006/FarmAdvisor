@@ -11,15 +11,15 @@ export const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-md border-b border-white/10">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sprout className="h-8 w-8 text-primary" />
-          <span className="font-heading font-bold text-xl text-white">FarmAdvisor</span>
+      <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Sprout className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+          <span className="font-heading font-bold text-base sm:text-xl text-white">FarmAdvisor</span>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-            <SelectTrigger className="w-[90px] sm:w-[120px] bg-white/10 border-white/20 text-white text-xs sm:text-sm">
+            <SelectTrigger className="w-[70px] sm:w-[120px] h-8 sm:h-10 bg-white/10 border-white/20 text-white text-xs sm:text-sm">
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent className="bg-popover z-[60]">
@@ -35,7 +35,7 @@ export const Header = () => {
           <Button variant="ghost" className="hidden sm:inline-flex text-white hover:bg-white/10" asChild>
             <Link to="/auth">{t("login")}</Link>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90" asChild>
+          <Button className="bg-primary hover:bg-primary/90 h-8 sm:h-10 text-xs sm:text-sm px-3 sm:px-4" asChild>
             <Link to="/auth">{t("signUp")}</Link>
           </Button>
         </div>

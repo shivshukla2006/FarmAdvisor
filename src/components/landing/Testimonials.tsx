@@ -25,19 +25,19 @@ const testimonials = [
 
 export const Testimonials = () => {
   return (
-    <section className="py-20 px-4 bg-black/60">
+    <section className="py-12 sm:py-20 px-4 bg-black/60">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold mb-4 text-white">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold mb-3 sm:mb-4 text-white">
             Trusted by Farmers
             <span className="text-primary"> Across India</span>
           </h2>
-          <p className="text-lg text-white/80">
+          <p className="text-sm sm:text-lg text-white/80 px-2">
             Join thousands of farmers who are already transforming their agricultural practices.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="p-6 relative bg-white/95 backdrop-blur-sm border-white/20">
               <Quote className="h-8 w-8 text-primary/20 absolute top-4 right-4" />
