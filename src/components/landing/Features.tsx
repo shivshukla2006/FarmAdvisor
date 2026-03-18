@@ -36,29 +36,29 @@ const features = [
 
 export const Features = () => {
   return (
-    <section className="py-20 px-4 bg-white/95 backdrop-blur-sm">
+    <section className="py-12 sm:py-20 px-4 bg-white/95 backdrop-blur-sm">
       <div className="container mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold mb-4 text-foreground">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-heading font-bold mb-3 sm:mb-4 text-foreground">
             Everything You Need for
             <span className="text-primary"> Successful Farming</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-sm sm:text-lg text-muted-foreground px-2">
             Comprehensive tools and insights to help you make informed decisions and maximize your farm's potential.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border bg-card"
+              className="p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border bg-card"
             >
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <feature.icon className="h-6 w-6 text-primary" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 sm:mb-4">
+                <feature.icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-heading font-semibold mb-2 text-card-foreground">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
+              <h3 className="text-lg sm:text-xl font-heading font-semibold mb-1.5 sm:mb-2 text-card-foreground">{feature.title}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
             </Card>
           ))}
         </div>
