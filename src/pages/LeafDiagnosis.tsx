@@ -80,6 +80,7 @@ const LeafDiagnosis = () => {
       if (!imageUrl) return;
       
       const diagnosis = await diagnoseLeaf({ imageUrl, language: lang });
+      setResultCache(prev => ({ ...prev, [lang]: diagnosis }));
       setResult(diagnosis);
       toast({ title: "Analysis Complete", description: `Disease identified: ${diagnosis.diseaseName}` });
     } catch (error) {
