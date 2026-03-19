@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History, Languages } from "lucide-react";
+import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, History } from "lucide-react";
+
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ListenButton } from "@/components/ui/ListenButton";
@@ -38,10 +38,10 @@ const PestDiagnosis = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [resultCache, setResultCache] = useState<Record<string, DiagnosisResult>>({});
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
-  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -178,7 +178,7 @@ const PestDiagnosis = () => {
       
       const diagnosis = await diagnosePest({ imageUrl, language: lang });
       
-      setResult({
+      const parsed: DiagnosisResult = {
         pest: diagnosis.pestIdentified,
         confidence: diagnosis.confidence || 0,
         severity: (diagnosis.severity?.charAt(0).toUpperCase() + diagnosis.severity?.slice(1)) as "Low" | "Medium" | "High",
@@ -187,7 +187,10 @@ const PestDiagnosis = () => {
           typeof t === 'string' ? t : `${t.method}: ${t.description}`
         ) || [],
         prevention: diagnosis.preventiveMeasures || [],
-      });
+      };
+      
+      setResultCache(prev => ({ ...prev, [lang]: parsed }));
+      setResult(parsed);
       
       toast({
         title: "Analysis Complete",
@@ -213,7 +216,9 @@ const PestDiagnosis = () => {
 
   const handleLanguageChange = (lang: "en" | "hi") => {
     setResultLang(lang);
-    if (uploadedImageUrl && result) {
+    if (resultCache[lang]) {
+      setResult(resultCache[lang]);
+    } else if (uploadedImageUrl && result) {
       handleAnalyze(lang);
     }
   };
@@ -223,6 +228,7 @@ const PestDiagnosis = () => {
     setPreviewUrl("");
     setUploadedImageUrl("");
     setResult(null);
+    setResultCache({});
   };
 
   const getSeverityColor = (severity: string) => {
@@ -340,20 +346,9 @@ const PestDiagnosis = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Select value={listenLang} onValueChange={setListenLang}>
-                      <SelectTrigger className="w-20 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">EN</SelectItem>
-                        <SelectItem value="hi">हिन्दी</SelectItem>
-                        <SelectItem value="mr">मराठी</SelectItem>
-                        <SelectItem value="ta">தமிழ்</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <ListenButton 
                       text={buildPestListenText()} 
-                      language={listenLang}
+                      language={resultLang}
                       size="sm"
                     />
                     <Button

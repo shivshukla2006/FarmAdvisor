@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Beaker, TreeDeciduous, Languages } from "lucide-react";
+import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, Leaf, Shield, Beaker, TreeDeciduous } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { diagnoseLeaf, uploadLeafImage, type LeafDiagnosisResult } from "@/services/leafDiagnosisService";
 import { ListenButton } from "@/components/ui/ListenButton";
@@ -17,8 +16,8 @@ const LeafDiagnosis = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
+  const [resultCache, setResultCache] = useState<Record<string, LeafDiagnosisResult>>({});
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
-  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
 
   const buildLeafListenText = () => {
@@ -80,6 +79,7 @@ const LeafDiagnosis = () => {
       if (!imageUrl) return;
       
       const diagnosis = await diagnoseLeaf({ imageUrl, language: lang });
+      setResultCache(prev => ({ ...prev, [lang]: diagnosis }));
       setResult(diagnosis);
       toast({ title: "Analysis Complete", description: `Disease identified: ${diagnosis.diseaseName}` });
     } catch (error) {
@@ -93,7 +93,9 @@ const LeafDiagnosis = () => {
 
   const handleLanguageChange = (lang: "en" | "hi") => {
     setResultLang(lang);
-    if (uploadedImageUrl && result) {
+    if (resultCache[lang]) {
+      setResult(resultCache[lang]);
+    } else if (uploadedImageUrl && result) {
       handleAnalyze(lang);
     }
   };
@@ -103,6 +105,7 @@ const LeafDiagnosis = () => {
     setPreviewUrl("");
     setUploadedImageUrl("");
     setResult(null);
+    setResultCache({});
   };
 
   const getSeverityColor = (severity: string) => {
@@ -204,20 +207,9 @@ const LeafDiagnosis = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Select value={listenLang} onValueChange={setListenLang}>
-                      <SelectTrigger className="w-20 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">EN</SelectItem>
-                        <SelectItem value="hi">हिन्दी</SelectItem>
-                        <SelectItem value="mr">मराठी</SelectItem>
-                        <SelectItem value="ta">தமிழ்</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <ListenButton 
                       text={buildLeafListenText()} 
-                      language={listenLang}
+                      language={resultLang}
                       size="sm"
                     />
                     <Button
