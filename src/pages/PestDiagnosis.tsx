@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, History } from "lucide-react";
-import { Upload, Camera, Loader2, AlertCircle, CheckCircle, X, MessageCircle, History, Languages } from "lucide-react";
+
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ListenButton } from "@/components/ui/ListenButton";
