@@ -106,6 +106,7 @@ const LeafDiagnosis = () => {
     setPreviewUrl("");
     setUploadedImageUrl("");
     setResult(null);
+    setResultCache({});
   };
 
   const getSeverityColor = (severity: string) => {
