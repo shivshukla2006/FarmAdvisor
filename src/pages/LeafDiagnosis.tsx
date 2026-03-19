@@ -17,8 +17,8 @@ const LeafDiagnosis = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<LeafDiagnosisResult | null>(null);
+  const [resultCache, setResultCache] = useState<Record<string, LeafDiagnosisResult>>({});
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
-  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
 
   const buildLeafListenText = () => {
