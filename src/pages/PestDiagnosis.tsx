@@ -216,7 +216,9 @@ const PestDiagnosis = () => {
 
   const handleLanguageChange = (lang: "en" | "hi") => {
     setResultLang(lang);
-    if (uploadedImageUrl && result) {
+    if (resultCache[lang]) {
+      setResult(resultCache[lang]);
+    } else if (uploadedImageUrl && result) {
       handleAnalyze(lang);
     }
   };
