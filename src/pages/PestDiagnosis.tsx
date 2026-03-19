@@ -178,7 +178,7 @@ const PestDiagnosis = () => {
       
       const diagnosis = await diagnosePest({ imageUrl, language: lang });
       
-      setResult({
+      const parsed: DiagnosisResult = {
         pest: diagnosis.pestIdentified,
         confidence: diagnosis.confidence || 0,
         severity: (diagnosis.severity?.charAt(0).toUpperCase() + diagnosis.severity?.slice(1)) as "Low" | "Medium" | "High",
@@ -187,7 +187,10 @@ const PestDiagnosis = () => {
           typeof t === 'string' ? t : `${t.method}: ${t.description}`
         ) || [],
         prevention: diagnosis.preventiveMeasures || [],
-      });
+      };
+      
+      setResultCache(prev => ({ ...prev, [lang]: parsed }));
+      setResult(parsed);
       
       toast({
         title: "Analysis Complete",
