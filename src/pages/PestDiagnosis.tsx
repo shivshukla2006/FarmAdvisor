@@ -228,6 +228,7 @@ const PestDiagnosis = () => {
     setPreviewUrl("");
     setUploadedImageUrl("");
     setResult(null);
+    setResultCache({});
   };
 
   const getSeverityColor = (severity: string) => {
