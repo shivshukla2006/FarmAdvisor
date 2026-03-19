@@ -38,10 +38,10 @@ const PestDiagnosis = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [resultCache, setResultCache] = useState<Record<string, DiagnosisResult>>({});
   const [history, setHistory] = useState<DiagnosisHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [resultLang, setResultLang] = useState<"en" | "hi">("en");
-  const [listenLang, setListenLang] = useState<string>("en");
   const { toast } = useToast();
   const { user } = useAuth();
 
