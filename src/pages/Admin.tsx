@@ -22,7 +22,7 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { SchemesManagement } from "@/components/admin/SchemesManagement";
 import { WeatherAlertsManagement } from "@/components/admin/WeatherAlertsManagement";
 import { AdminActivityLog } from "@/components/admin/AdminActivityLog";
-import { LeafLoader } from "@/components/ui/LeafLoader";
+import { TractorLoader } from "@/components/ui/TractorLoader";
 
 const Admin = () => {
   const { isAdmin, isLoading } = useUserRole();
@@ -32,7 +32,7 @@ const Admin = () => {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <LeafLoader size="lg" />
+          <TractorLoader size="lg" />
         </div>
       </DashboardLayout>
     );
