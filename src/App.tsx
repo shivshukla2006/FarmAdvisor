@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { LeafLoader } from "@/components/ui/LeafLoader";
+import { TractorLoader } from "@/components/ui/TractorLoader";
 import { ThemeProvider } from "next-themes";
 import { useStandaloneMode } from "@/hooks/useStandaloneMode";
 
