@@ -32,7 +32,7 @@ const Admin = () => {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <LeafLoader size="lg" />
+          <TractorLoader size="lg" />
         </div>
       </DashboardLayout>
     );
