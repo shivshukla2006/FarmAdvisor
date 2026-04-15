@@ -2,9 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { lazy, Suspense } from "react";
-
-const FarmScene = lazy(() => import("@/components/landing/FarmScene").then(m => ({ default: m.FarmScene })));
 import { useRef } from "react";
 
 export const Hero = () => {
@@ -128,21 +125,6 @@ export const Hero = () => {
             ))}
           </motion.div>
 
-          {/* 3D Farm Scene */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 1 }}
-            className="mt-6 sm:mt-10"
-          >
-            <Suspense fallback={
-              <div className="w-full h-[280px] sm:h-[350px] md:h-[400px] flex items-center justify-center">
-                <div className="text-white/50 text-sm animate-pulse">Loading 3D Scene...</div>
-              </div>
-            }>
-              <FarmScene />
-            </Suspense>
-          </motion.div>
         </div>
       </motion.div>
     </section>
