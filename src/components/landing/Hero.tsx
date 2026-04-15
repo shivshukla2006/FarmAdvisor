@@ -2,9 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { lazy, Suspense } from "react";
-
-const FarmScene = lazy(() => import("@/components/landing/FarmScene").then(m => ({ default: m.FarmScene })));
 import { useRef } from "react";
 
 export const Hero = () => {
