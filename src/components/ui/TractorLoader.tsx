@@ -91,13 +91,13 @@ export const TractorLoader = ({ size = "md", className = "" }: TractorLoaderProp
         <motion.circle
           cx="33" cy="6" r="2.5"
           className="fill-muted-foreground/30"
-          animate={{ cy: [6, -4], opacity: [0.5, 0], r: [2.5, 5] }}
+          animate={{ cy: [6, -4], opacity: [0.5, 0] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
         />
         <motion.circle
           cx="35" cy="4" r="2"
           className="fill-muted-foreground/20"
-          animate={{ cy: [4, -6], opacity: [0.4, 0], r: [2, 4] }}
+          animate={{ cy: [4, -6], opacity: [0.4, 0] }}
           transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut", delay: 0.4 }}
         />
       </motion.svg>
