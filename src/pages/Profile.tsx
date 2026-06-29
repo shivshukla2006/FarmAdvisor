@@ -328,6 +328,60 @@ const Profile = () => {
               </div>
             </div>
 
+            <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 p-4 rounded-lg bg-muted/40 border border-border">
+              <div className="relative">
+                <Avatar className="h-24 w-24 ring-2 ring-primary/30">
+                  <AvatarImage src={avatarUrl ?? undefined} alt="Profile picture" />
+                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
+                    {form.getValues("fullName")?.charAt(0)?.toUpperCase() || <User className="h-8 w-8" />}
+                  </AvatarFallback>
+                </Avatar>
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/70 rounded-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="font-heading font-semibold mb-1">Profile Picture</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  PNG, JPG up to 5 MB. A square photo works best.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingAvatar}
+                    onClick={() => document.getElementById("avatar-file-input")?.click()}
+                  >
+                    {avatarUrl ? <Camera className="h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {avatarUrl ? "Change" : "Upload"}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={uploadingAvatar}
+                      onClick={handleAvatarRemove}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  )}
+                  <input
+                    id="avatar-file-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                </div>
+              </div>
+            </div>
+
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
