@@ -3,104 +3,182 @@ import { motion } from "framer-motion";
 interface TractorLoaderProps {
   size?: "sm" | "md" | "lg";
   className?: string;
+  label?: string;
+  showWordmark?: boolean;
 }
 
-export const TractorLoader = ({ size = "md", className = "" }: TractorLoaderProps) => {
-  const sizeMap = { sm: 48, md: 64, lg: 96 };
+/**
+ * Branded FarmAdvisor loading animation.
+ * - Pulsing sprout logo (matches brand mark used in Header)
+ * - Growing leaves + rotating sun rays
+ * - Orbiting seed particles
+ * - Shimmering "FarmAdvisor" wordmark
+ *
+ * Kept as TractorLoader export for backwards compatibility across the app.
+ */
+export const TractorLoader = ({
+  size = "md",
+  className = "",
+  label,
+  showWordmark = true,
+}: TractorLoaderProps) => {
+  const sizeMap = { sm: 56, md: 88, lg: 128 };
   const s = sizeMap[size];
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`} style={{ width: s * 2, height: s }}>
-      {/* Ground line */}
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary/30 rounded-full"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.5 }}
-      />
+    <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+      <div className="relative" style={{ width: s, height: s }}>
+        {/* Rotating sun rays */}
+        <motion.svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0"
+          style={{ width: s, height: s }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        >
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i * 360) / 12;
+            return (
+              <line
+                key={i}
+                x1="50"
+                y1="6"
+                x2="50"
+                y2="14"
+                className="stroke-accent"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                transform={`rotate(${angle} 50 50)`}
+                opacity={0.55}
+              />
+            );
+          })}
+        </motion.svg>
 
-      {/* Dust particles */}
-      {[0, 1, 2].map((i) => (
+        {/* Soft glow halo */}
         <motion.div
-          key={i}
-          className="absolute rounded-full bg-primary/20"
-          style={{ width: 4 + i * 2, height: 4 + i * 2, bottom: 4 + i * 3 }}
-          initial={{ left: "30%", opacity: 0 }}
-          animate={{ left: "-10%", opacity: [0, 0.6, 0] }}
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            delay: i * 0.3,
-            ease: "easeOut",
-          }}
+          className="absolute inset-[18%] rounded-full bg-primary/15 blur-xl"
+          animate={{ scale: [0.9, 1.15, 0.9], opacity: [0.4, 0.75, 0.4] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
         />
-      ))}
 
-      {/* Tractor SVG */}
-      <motion.svg
-        viewBox="0 0 100 60"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ width: s, height: s * 0.6 }}
-        animate={{ x: [-4, 4, -4] }}
-        transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-      >
-        {/* Body */}
-        <rect x="30" y="15" width="40" height="25" rx="4" className="fill-primary" />
-        {/* Cabin */}
-        <rect x="42" y="5" width="22" height="18" rx="3" className="fill-primary/80" />
-        {/* Window */}
-        <rect x="46" y="8" width="14" height="10" rx="2" className="fill-primary-foreground/30" />
-        {/* Exhaust pipe */}
-        <rect x="32" y="8" width="3" height="10" rx="1.5" className="fill-muted-foreground/60" />
-        {/* Hood */}
-        <rect x="18" y="22" width="16" height="14" rx="2" className="fill-primary/90" />
-        {/* Front grille */}
-        <rect x="16" y="25" width="4" height="8" rx="1" className="fill-primary-foreground/20" />
-
-        {/* Rear wheel */}
-        <motion.g
-          animate={{ rotate: 360 }}
-          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-          style={{ originX: "55px", originY: "48px" }}
+        {/* Dashed soil ring */}
+        <motion.svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0"
+          style={{ width: s, height: s }}
+          animate={{ rotate: -360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
         >
-          <circle cx="55" cy="48" r="12" className="stroke-foreground/80" strokeWidth="3" fill="none" />
-          <circle cx="55" cy="48" r="5" className="fill-foreground/40" />
-          {/* Spokes */}
-          <line x1="55" y1="37" x2="55" y2="42" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="55" y1="54" x2="55" y2="59" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="44" y1="48" x2="49" y2="48" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="61" y1="48" x2="66" y2="48" className="stroke-foreground/50" strokeWidth="1.5" />
-        </motion.g>
+          <circle
+            cx="50"
+            cy="50"
+            r="34"
+            fill="none"
+            className="stroke-primary/40"
+            strokeWidth="1.5"
+            strokeDasharray="3 5"
+          />
+        </motion.svg>
 
-        {/* Front wheel */}
-        <motion.g
-          animate={{ rotate: 360 }}
-          transition={{ duration: 0.6, repeat: Infinity, ease: "linear" }}
-          style={{ originX: "22px", originY: "48px" }}
+        {/* Orbiting seeds */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute left-1/2 top-1/2"
+            style={{ width: 0, height: 0 }}
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * (3.5 / 3),
+            }}
+          >
+            <div
+              className="absolute rounded-full bg-accent shadow-[0_0_8px_hsl(var(--accent))]"
+              style={{
+                width: 6,
+                height: 6,
+                transform: `translate(-50%, -50%) translateY(-${s * 0.34}px)`,
+              }}
+            />
+          </motion.div>
+        ))}
+
+        {/* Central sprout logo (matches brand) */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <circle cx="22" cy="48" r="8" className="stroke-foreground/80" strokeWidth="2.5" fill="none" />
-          <circle cx="22" cy="48" r="3" className="fill-foreground/40" />
-          <line x1="22" y1="41" x2="22" y2="44" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="22" y1="52" x2="22" y2="55" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="15" y1="48" x2="18" y2="48" className="stroke-foreground/50" strokeWidth="1.5" />
-          <line x1="26" y1="48" x2="29" y2="48" className="stroke-foreground/50" strokeWidth="1.5" />
-        </motion.g>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-primary drop-shadow-[0_2px_8px_hsl(var(--primary)/0.5)]"
+            style={{ width: s * 0.5, height: s * 0.5 }}
+          >
+            {/* Stem */}
+            <motion.path
+              d="M7 20h10"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.6 }}
+            />
+            <motion.path
+              d="M12 20v-7"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            />
+            {/* Left leaf */}
+            <motion.path
+              d="M12 13c-3 0-6-2-6-6 3 0 6 2 6 6z"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.5, repeat: Infinity, repeatType: "reverse", repeatDelay: 1.2 }}
+            />
+            {/* Right leaf */}
+            <motion.path
+              d="M12 13c3 0 6-2 6-6-3 0-6 2-6 6z"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8, repeat: Infinity, repeatType: "reverse", repeatDelay: 1.2 }}
+            />
+          </svg>
+        </motion.div>
+      </div>
 
-        {/* Smoke puffs */}
-        <motion.circle
-          cx="33" cy="6" r="2.5"
-          className="fill-muted-foreground/30"
-          animate={{ cy: [6, -4], opacity: [0.5, 0] }}
-          transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
-        />
-        <motion.circle
-          cx="35" cy="4" r="2"
-          className="fill-muted-foreground/20"
-          animate={{ cy: [4, -6], opacity: [0.4, 0] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut", delay: 0.4 }}
-        />
-      </motion.svg>
+      {showWordmark && (
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="relative overflow-hidden">
+            <span
+              className="font-display text-lg font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-clip-text text-transparent"
+              style={{ animation: "shimmer 2.4s linear infinite" }}
+            >
+              FarmAdvisor
+            </span>
+          </div>
+          <motion.span
+            className="text-xs text-muted-foreground"
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            {label ?? "Growing your insights…"}
+          </motion.span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   );
 };
