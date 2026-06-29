@@ -92,25 +92,11 @@ export const RegisterForm = ({ onSuccess, onOtpRequest }: RegisterFormProps) => 
       return;
     }
 
-    // Send OTP to the registered email for verification
-    const { error: otpError } = await supabase.auth.signInWithOtp({ email: data.email });
-
-    if (otpError) {
-      toast({
-        title: "Registration Successful",
-        description: "Account created but failed to send OTP. Please try logging in with OTP.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      onSuccess?.();
-      return;
-    }
-    
     toast({
       title: "Account Created!",
-      description: "A verification code has been sent to your email.",
+      description: "A 6-digit verification code has been sent to your email.",
     });
-    
+
     setIsLoading(false);
     onOtpRequest?.(data.email);
   };
