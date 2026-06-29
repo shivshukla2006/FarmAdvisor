@@ -123,12 +123,86 @@ const Profile = () => {
         setWeatherAlerts(data.notifications_weather ?? true);
         setEmailNotifications(data.notifications_schemes ?? true);
         setCommunityUpdates(data.notifications_community ?? false);
+
+        const path = (data as any).avatar_url as string | null;
+        if (path) {
+          setAvatarPath(path);
+          const { data: signed } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(path, 60 * 60);
+          if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+        }
       }
       setLoadingProfile(false);
     };
 
     loadProfile();
   }, [user, form, toast]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5 MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+
+      // remove previous file
+      if (avatarPath && avatarPath !== path) {
+        await supabase.storage.from("avatars").remove([avatarPath]);
+      }
+
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path } as any)
+        .eq("id", user.id);
+      if (updErr) throw updErr;
+
+      const { data: signed } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 60 * 60);
+
+      setAvatarPath(path);
+      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      toast({ title: "Profile picture updated" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message ?? "Try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user || !avatarPath) return;
+    setUploadingAvatar(true);
+    try {
+      await supabase.storage.from("avatars").remove([avatarPath]);
+      await supabase.from("profiles").update({ avatar_url: null } as any).eq("id", user.id);
+      setAvatarPath(null);
+      setAvatarUrl(null);
+      toast({ title: "Profile picture removed" });
+    } catch (err: any) {
+      toast({ title: "Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!user) return;
