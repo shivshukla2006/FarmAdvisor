@@ -43,11 +43,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, User, Bell, Globe, Lock, Trash2 } from "lucide-react";
+import { Loader2, User, Bell, Globe, Lock, Trash2, Camera, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const profileSchema = z.object({
   fullName: z.string().min(2).max(100),
@@ -71,6 +72,9 @@ const Profile = () => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
   const { user, deleteAccount, updatePassword, signOut } = useAuth();
 
@@ -119,12 +123,86 @@ const Profile = () => {
         setWeatherAlerts(data.notifications_weather ?? true);
         setEmailNotifications(data.notifications_schemes ?? true);
         setCommunityUpdates(data.notifications_community ?? false);
+
+        const path = (data as any).avatar_url as string | null;
+        if (path) {
+          setAvatarPath(path);
+          const { data: signed } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(path, 60 * 60);
+          if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+        }
       }
       setLoadingProfile(false);
     };
 
     loadProfile();
   }, [user, form, toast]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 5 MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+
+      // remove previous file
+      if (avatarPath && avatarPath !== path) {
+        await supabase.storage.from("avatars").remove([avatarPath]);
+      }
+
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path } as any)
+        .eq("id", user.id);
+      if (updErr) throw updErr;
+
+      const { data: signed } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 60 * 60);
+
+      setAvatarPath(path);
+      if (signed?.signedUrl) setAvatarUrl(signed.signedUrl);
+      toast({ title: "Profile picture updated" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message ?? "Try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user || !avatarPath) return;
+    setUploadingAvatar(true);
+    try {
+      await supabase.storage.from("avatars").remove([avatarPath]);
+      await supabase.from("profiles").update({ avatar_url: null } as any).eq("id", user.id);
+      setAvatarPath(null);
+      setAvatarUrl(null);
+      toast({ title: "Profile picture removed" });
+    } catch (err: any) {
+      toast({ title: "Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormValues) => {
     if (!user) return;
@@ -249,6 +327,60 @@ const Profile = () => {
                 <p className="text-sm text-muted-foreground">Update your personal details</p>
               </div>
             </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-5 mb-6 p-4 rounded-lg bg-muted/40 border border-border">
+              <div className="relative">
+                <Avatar className="h-24 w-24 ring-2 ring-primary/30">
+                  <AvatarImage src={avatarUrl ?? undefined} alt="Profile picture" />
+                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
+                    {form.getValues("fullName")?.charAt(0)?.toUpperCase() || <User className="h-8 w-8" />}
+                  </AvatarFallback>
+                </Avatar>
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/70 rounded-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="font-heading font-semibold mb-1">Profile Picture</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  PNG, JPG up to 5 MB. A square photo works best.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingAvatar}
+                    onClick={() => document.getElementById("avatar-file-input")?.click()}
+                  >
+                    {avatarUrl ? <Camera className="h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                    {avatarUrl ? "Change" : "Upload"}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={uploadingAvatar}
+                      onClick={handleAvatarRemove}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  )}
+                  <input
+                    id="avatar-file-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                </div>
+              </div>
+            </div>
+
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
